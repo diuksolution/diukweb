@@ -1,0 +1,72 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+        
+model User {
+  id            String     @id @default(cuid())
+  supabaseId    String     @unique @map("supabase_id")
+  email         String     @unique
+  name          String?
+  avatarUrl     String?    @map("avatar_url")
+  provider      String     @default("email") // email, google
+  role          String     @default("admin") // super_admin, admin
+  businessId    String     @map("business_id")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  
+  broadcasts    Broadcast[]
+  createdAdmins PendingAdmin[] @relation("CreatedBy")
+  business       Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model PendingAdmin {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String   // hashed password
+  name          String?
+  createdById   String   @map("created_by_id")
+  verificationToken String @unique @map("verification_token")
+  expiresAt     DateTime @map("expires_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  createdBy     User     @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@map("pending_admins")
+}
+
+model Broadcast {
+  id        String   @id @default(cuid())
+  pesan     String   @db.Text
+  tanggal   DateTime
+  idWA      String?
+  status    String?  @default("pending") // pending, sent, failed
+  userId    String?  @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("broadcasts")
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  nama      String
+  linkdata  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  users     User[]
+
+  @@map("businesses")
+}
+
