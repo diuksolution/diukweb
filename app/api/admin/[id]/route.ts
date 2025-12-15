@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 // PUT - Update admin
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -26,7 +26,7 @@ export async function PUT(
     }
 
     const { name } = await request.json()
-    const adminId = params.id
+    const { id: adminId } = await params
 
     // Check if admin exists and is not super_admin
     const admin = await prisma.user.findUnique({
@@ -64,7 +64,7 @@ export async function PUT(
 // DELETE - Delete admin
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -84,7 +84,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const adminId = params.id
+    const { id: adminId } = await params
 
     // Check if admin exists and is not super_admin
     const admin = await prisma.user.findUnique({

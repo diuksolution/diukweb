@@ -58,12 +58,13 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  // Only require authentication for dashboard routes
+  // Landing page (/) and other public routes don't need authentication
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    request.nextUrl.pathname.startsWith('/dashboard')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
+    // User trying to access dashboard without authentication, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

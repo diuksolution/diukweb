@@ -1,10 +1,10 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function VerifyAdminPage() {
+function VerifyAdminContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
@@ -118,6 +118,23 @@ export default function VerifyAdminPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyAdminPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Loading...</h1>
+            <p className="mt-2 text-sm text-gray-600">Please wait...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <VerifyAdminContent />
+    </Suspense>
   )
 }
 

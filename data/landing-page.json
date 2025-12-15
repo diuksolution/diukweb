@@ -1,0 +1,517 @@
+{
+  "header": {
+    "logo": {
+      "text": "DIUK",
+      "href": "/"
+    },
+    "navItems": [
+      { "label": "Home", "href": "/" },
+      { "label": "Layanan", "href": "#services" },
+      { "label": "Fitur", "href": "#features" },
+      { "label": "Harga", "href": "#pricing" }
+    ],
+    "ctaButtons": {
+      "login": { "label": "Log in", "href": "/login" },
+      "signup": { "label": "Daftar Sekarang", "href": "/login" }
+    },
+    "whatsapp": {
+      "number": "62881080619084",
+      "label": "Hubungi Kami"
+    }
+  },
+  "hero": {
+    "badge": "AI-Powered Customer Service & Sales",
+    "title": "Al Sales Automation for Modern Businesses",
+    "description": "Meningkatkan penjualan, mengurangi beban operasional, dan membuat bisnis Anda bekerja 24/7 tanpa bergantung pada manusia.",
+    "ctaButtons": [
+      { "label": "Hubungi Kami", "href": "#contact", "variant": "secondary" },
+      { "label": "Mulai Sekarang", "href": "/login", "variant": "primary" }
+    ],
+    "trustedBy": "Let AI do the work for your business."
+  },
+  "trustedBy": {
+    "title": "Trusted by 3,000+ businesses and leading brands",
+    "brands": [
+      { "name": "Astra", "logo": "/brands/astra.svg" },
+      { "name": "Santo", "logo": "/brands/santo.svg" },
+      { "name": "Royal Parking", "logo": "/brands/royal-parking.svg" },
+      { "name": "Sominer", "logo": "/brands/sominer.svg" },
+      { "name": "Dr W Skincare", "logo": "/brands/dr-w.svg" },
+      { "name": "Scarlett", "logo": "/brands/scarlett.svg" },
+      { "name": "Ekles", "logo": "/brands/ekles.svg" },
+      { "name": "Dokter Hub", "logo": "/brands/dokter-hub.svg" },
+      { "name": "Meval", "logo": "/brands/meval.svg" },
+      { "name": "SB Dental", "logo": "/brands/sb-dental.svg" },
+      { "name": "Darius Tour", "logo": "/brands/darius-tour.svg" },
+      { "name": "Kreasie Edu", "logo": "/brands/kreasie-edu.svg" }
+    ]
+  },
+  "businessChallenges": {
+    "title": "Sebagian besar bisnis masih",
+    "titleHighlight": "menghadapi tantangan besar",
+    "subtitle": "",
+    "image": "/bisnischallenges.png",
+    "challenges": [
+      {
+        "text": "Respon pelanggan lambat",
+        "consequence": "peluang closing hilang"
+      },
+      {
+        "text": "Chat menumpuk di WhatsApp, Instagram, TikTok"
+      },
+      {
+        "text": "Admin sering salah jawab atau tidak konsisten"
+      },
+      {
+        "text": "Tidak ada otomatisasi follow-up"
+      },
+      {
+        "text": "Data pelanggan tidak tercatat dengan baik"
+      }
+    ],
+    "consequences": {
+      "prefix": "Akibatnya:",
+      "items": [
+        "kehilangan leads",
+        "penjualan stagnan",
+        "biaya operasional naik"
+      ]
+    }
+  },
+  "comparison": {
+    "title": "Mengapa bisnis sekarang harus mengadopsi AI?",
+    "subtitle": "",
+    "before": {
+      "title": "BISNIS TANPA AI (MANUAL SYSTEM)",
+      "subtitle": "KETIDAKEFISIENAN & KEHILANGAN PELUANG",
+      "items": [
+        {
+          "icon": "⏰",
+          "title": "Slow Response",
+          "description": "68% leads hilang karena respon lambat. Rata-rata respon admin: 12-45 menit."
+        },
+        {
+          "icon": "📁",
+          "title": "Poor Data Management",
+          "description": "Hanya 14% bisnis yang mencatat data pelanggan dengan rapi."
+        },
+        {
+          "icon": "💬",
+          "title": "Communication Errors",
+          "description": "Kesalahan jawaban admin terjadi pada 1 dari 5 percakapan."
+        },
+        {
+          "icon": "🛒",
+          "title": "Lost Sales",
+          "description": "72% pelanggan batal beli jika tidak dijawab dalam 5 menit."
+        }
+      ]
+    },
+    "after": {
+      "title": "DENGAN AI SALES AUTOMATION (DIUK)",
+      "subtitle": "EFISIENSI TINGGI & PERTUMBUHAN BISNIS",
+      "items": [
+        {
+          "icon": "⚡",
+          "title": "Instant Response",
+          "description": "Respon <1 detik (instan). 24/7 aktif tanpa istirahat."
+        },
+        {
+          "icon": "📈",
+          "title": "Increased Conversion",
+          "description": "Tingkat konversi naik 20-45%."
+        },
+        {
+          "icon": "☁️",
+          "title": "Automated CRM",
+          "description": "Semua leads tersimpan otomatis di CRM."
+        },
+        {
+          "icon": "🎯",
+          "title": "Automated Follow-up",
+          "description": "Follow-up otomatis meningkatkan closing hingga 3x lipat."
+        }
+      ]
+    }
+  },
+  "services": {
+    "title": "hadir untuk mengatasi permasalahan anda",
+    "titleHighlight": "DIUK Solution ",
+    "subtitle": "Dengan memanfaatkan teknologi AI, DIUK membantu bisnis:",
+    "image": "/diuksolution.png",
+    "benefits": [
+      "Respon otomatis 24/7 di WhatsApp, Instagram, TikTok.",
+      "Mengelola chat tanpa penumpukan dan menjaga jawaban tetap konsisten.",
+      "Follow-up otomatis untuk meningkatkan peluang closing.",
+      "Pencatatan data pelanggan yang rapi dan terstruktur."
+    ],
+    "output": {
+      "prefix": "Output",
+      "items": [
+        "penjualan meningkat",
+        "peluang tidak terbuang",
+        "biaya operasional lebih efisien"
+      ]
+    }
+  },
+  "features": {
+    "title": "Solusi yang Dihadirkan DIUK",
+    "subtitle": "DIUK AI SALES AUTOMATION: SATU PLATFORM, OTOMATISASI PENUH PROSES SALES ANDA",
+    "whatDiukDoes": {
+      "steps": [
+        {
+          "number": 1,
+          "image": "/what-diuk-does-1.png",
+          "title": "Menjawab pertanyaan customer secara instan"
+        },
+        {
+          "number": 2,
+          "image": "/what-diuk-does-2.png",
+          "title": "Mengedukasi dan membangun minat beli"
+        },
+        {
+          "number": 3,
+          "image": "/what-diuk-does-3.png",
+          "title": "Menawarkan produk paling relevan"
+        },
+        {
+          "number": 4,
+          "image": "/what-diuk-does-4.png",
+          "title": "Mengumpulkan data leads dan menyimpan di CRM"
+        },
+        {
+          "number": 5,
+          "image": "/what-diuk-does-5.png",
+          "title": "Follow-up otomatis hingga customer melakukan pembelian"
+        }
+      ],
+      "result": "HASIL: EFISIENSI MAKSIMAL & PENINGKATAN PENJUALAN SIGNIFIKAN"
+    },
+    "workflow": {
+      "title": "DIUK Automated Sales Workflow",
+      "steps": [
+        {
+          "number": 1,
+          "image": "/workflow-step-1.png",
+          "title": "Customer Chat (WA/IG/TikTok)",
+          "description": "Interaksi awal customer melalui berbagai platform messaging"
+        },
+        {
+          "number": 2,
+          "image": "/workflow-step-2.png",
+          "title": "AI Auto-Response + Needs Discovery",
+          "description": "AI otomatis merespon dan mengidentifikasi kebutuhan customer"
+        },
+        {
+          "number": 3,
+          "image": "/workflow-step-3.png",
+          "title": "AI Offers Products/Packages",
+          "description": "AI menawarkan produk atau paket yang relevan berdasarkan kebutuhan"
+        },
+        {
+          "number": 4,
+          "image": "/workflow-step-4.png",
+          "title": "Lead Auto-Saved to Sheet/Dashboard",
+          "description": "Data customer (leads) otomatis tersimpan ke sheet atau dashboard"
+        },
+        {
+          "number": 5,
+          "image": "/workflow-step-5.png",
+          "title": "Automated Follow-up System",
+          "description": "Sistem follow-up otomatis melalui email atau komunikasi lainnya"
+        },
+        {
+          "number": 6,
+          "image": "/workflow-step-6.png",
+          "title": "Until Closing",
+          "description": "Tahap akhir workflow yang mengarah pada penyelesaian penjualan"
+        }
+      ]
+    },
+    "advantages": {
+      "title": "Why DIUK is Better Than Standard Chatbots?",
+      "subtitle": "KELEBIHAN DIUK SALES AI AUTOMATION",
+      "items": [
+        {
+          "icon": "🧠",
+          "title": "Menggunakan AI bukan rules",
+          "description": "Pembelajaran mendalam dan fleksibel, adaptasi dinamis"
+        },
+        {
+          "icon": "⚡",
+          "title": "Jawaban cepat seperti manusia",
+          "description": "Respon instan, natural, dan personal"
+        },
+        {
+          "icon": "🤖",
+          "title": "Konsisten, tidak capek, tidak mood-swing",
+          "description": "Layanan 24/7 stabil tanpa henti"
+        },
+        {
+          "icon": "📚",
+          "title": "Kemampuan mempelajari skrip bisnis",
+          "description": "Adaptasi cepat ke kebutuhan spesifik"
+        },
+        {
+          "icon": "📊",
+          "title": "Integrasi dengan CRM & dashboard",
+          "description": "Data terpusat, teranalisis real-time"
+        },
+        {
+          "icon": "🌐",
+          "title": "Mendukung multi-platform",
+          "description": "Jangkauan luas di semua saluran digital"
+        }
+      ]
+    }
+  },
+  "pricing": {
+    "title": "HARGA LAYANAN KAMI",
+    "subtitle": "Paket AI Agent, Website, dan Combo untuk bisnis Anda",
+    "description": "Pilih paket sesuai kebutuhan AI Agent, Website Profile, atau gabungan keduanya untuk efisiensi maksimal.",
+    "packages": [
+      {
+        "category": "AI Agent",
+        "name": "Diuk Plus",
+        "price": "IDR 1.200.000,00 / month",
+        "period": "AI Agent WhatsApp",
+        "features": [
+          "3.500–4.000 active user",
+          "24 jam AI kerja",
+          "AI responses 25k / month",
+          "Workflow",
+          "Dashboard CS",
+          "Customize"
+        ],
+        "setupFee": "Setup fee AI agent IDR 4.000.000,00"
+      },
+      {
+        "category": "AI Agent",
+        "name": "Diuk Plus Pro",
+        "price": "IDR 1.500.000,00 / month",
+        "period": "AI Agent WhatsApp + Instagram",
+        "features": [
+          "7.000 active user",
+          "24 jam AI kerja",
+          "AI responses 50k / month",
+          "Workflow",
+          "Dashboard CS",
+          "Customize"
+        ],
+        "setupFee": "Setup fee AI agent IDR 4.200.000,00",
+        "tag": "Most Popular"
+      },
+      {
+        "category": "Website",
+        "name": "Diuk Web",
+        "price": "IDR 1.200.000,00 / year",
+        "period": "Website profile + domain",
+        "features": [
+          "Website profile",
+          "Domain URL",
+          "Free customize design"
+        ],
+        "setupFee": "Setup fee website IDR 4.500.000,00"
+      }
+    ],
+    "combos": {
+      "title": "Paket Combo Website + AI Agent",
+      "subtitle": "Hemat biaya dengan kombinasi Website + AI Agent",
+      "items": [
+        {
+          "name": "Diuk Web + Diuk Plus",
+          "agentPrice": "AI agent: IDR 1.000.000,00 / month",
+          "webPrice": "Website: IDR 1.000.000,00 / year",
+          "setupFee": "Setup fee AI agent + website IDR 7.000.000,00",
+          "savings": "Hemat hingga 1.9 juta"
+        },
+        {
+          "name": "Diuk Web + Diuk Plus Pro",
+          "agentPrice": "AI agent: IDR 1.250.000,00 / month",
+          "webPrice": "Website: IDR 1.000.000,00 / year",
+          "setupFee": "Setup fee AI agent + website IDR 7.100.000,00",
+          "savings": "Hemat hingga 2 juta"
+        }
+      ]
+    }
+  },
+  "advancedFeatures": [
+    {
+      "badge": "🚀 Complete AI + Omnichannel CRM Solution",
+      "title": "Reply to Thousands of Chats Instantly From One Dashboard",
+      "description": "No more juggling dozens of platforms. Your AI Agent handles thousands of chats in one Omnichannel CRM.",
+      "image": "/features/omnichannel.png"
+    },
+    {
+      "badge": "🎯 Advanced AI Agent Builder",
+      "title": "Build an AI Agent in 5 minutes",
+      "description": "Manage all customer interactions with an AI agent you can set up fast. Train it on your data and integrate anywhere.",
+      "subFeatures": [
+        {
+          "title": "Simple AI Builder",
+          "description": "Create powerful AI agents without code in minutes - just like briefing your CS team."
+        },
+        {
+          "title": "Knowledge Source",
+          "description": "Paste SOPs and business info so AI answers business-specific questions accurately."
+        },
+        {
+          "title": "API Integration",
+          "description": "Connect to APIs for shipping rates, appointment booking, and more."
+        }
+      ],
+      "image": "/features/ai-builder.png"
+    },
+    {
+      "badge": "🆕 New Feature",
+      "title": "Multi AI Agents & Flow Builder",
+      "description": "Design complex conversation flows with ease. Route customers to the right AI or human agent.",
+      "subFeatures": [
+        {
+          "title": "Multiple Specialized Agents",
+          "description": "Create agents for sales, support, billing - each with its own knowledge base."
+        },
+        {
+          "title": "Visual Flow Designer",
+          "description": "Drag-and-drop UI to design flows. No coding needed."
+        },
+        {
+          "title": "AI Working Hours",
+          "description": "Set hours: 9–5 to Human Agents, off-hours to AI Agents."
+        }
+      ],
+      "image": "/features/flow-builder.png"
+    },
+    {
+      "badge": "🎯 Advanced Feature",
+      "title": "Ticketing System & Sales Pipeline",
+      "description": "Manage every interaction in a visual pipeline - from lead to after‑sales support.",
+      "subFeatures": [
+        {
+          "title": "Multiple Boards",
+          "description": "Separate boards for sales, support, billing - or custom per your team."
+        },
+        {
+          "title": "Automation Rules",
+          "description": "Auto‑assign, update statuses, and send notifications with your triggers."
+        },
+        {
+          "title": "Analytics & Insights",
+          "description": "Track sales, complaints, agent performance, conversions, and more."
+        }
+      ],
+      "image": "/features/ticketing.png"
+    }
+  ],
+  "customerService": {
+    "title": "Customer Service Super App to serve your customers brilliantly",
+    "description": "Everything you need to serve customers at scale - Omnichannel, CRM, Ticketing, AI Agent Builder, and more.",
+    "features": [
+      {
+        "title": "Omnichannel + CRM",
+        "description": "Complete Chatting Dashboard - Monitor every conversation, AI answers, and customer chats in one dashboard.",
+        "icon": "💬"
+      },
+      {
+        "title": "Creative",
+        "description": "Ticketing & Order Management - Manage orders, bookings or your sales pipeline easily.",
+        "icon": "🎨"
+      },
+      {
+        "title": "Campaign",
+        "description": "Broadcasts & AI Follow-ups - Broadcast to 100k customers confidently. AI answers questions and follows up lost leads.",
+        "icon": "📢"
+      },
+      {
+        "title": "Human Agent",
+        "description": "Multi-Agent Collaboration - Important chats are automatically routed to human agents.",
+        "icon": "👥"
+      },
+      {
+        "title": "Open API",
+        "description": "Integrate with Your Systems - Connect DIUK to your stack via Open API.",
+        "icon": "🔌"
+      },
+      {
+        "title": "Website Development",
+        "description": "Professional Business Website - Modern, responsive website profile untuk meningkatkan kredibilitas dan reach bisnis Anda.",
+        "icon": "🌐"
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "Client Testimonials",
+    "subtitle": "DIUK is trusted by thousands of SMEs, corporations, and government programs",
+    "items": [
+      {
+        "text": "DIUK helps us serve customers better. Fast, accurate replies keep people happy - revenue grew 30% after adopting it.",
+        "author": "",
+        "role": ""
+      },
+      {
+        "text": "We can now handle orders 24/7 thanks to DIUK. No more missed requests and our CS is far more efficient.",
+        "author": "",
+        "role": ""
+      },
+      {
+        "text": "Patient registration and online consults are much easier. The 24/7 response really helps - highly recommended for clinics.",
+        "author": "",
+        "role": ""
+      },
+      {
+        "text": "DIUK handles hundreds of inquiries daily. Follow‑ups are faster and our conversion rate improved significantly.",
+        "author": "",
+        "role": ""
+      },
+      {
+        "text": "With DIUK, we serve customers around the clock. Product questions get accurate answers instantly - sales up 50% in 3 months.",
+        "author": "",
+        "role": ""
+      },
+      {
+        "text": "Bookings and customer service are smoother. It handles many chats at once - perfect for busy travel businesses.",
+        "author": "",
+        "role": ""
+      }
+    ]
+  },
+  "finalCTA": {
+    "title": "Siap meningkatkan layanan pelanggan Anda?",
+    "description": "Bergabung dengan DIUK untuk meningkatkan layanan pelanggan Anda.",
+    "benefits": [
+    ],
+    "buttons": [
+      { "label": "Hubungi Kami", "href": "#contact", "variant": "secondary" },
+      { "label": "Mulai Sekarang", "href": "/login", "variant": "primary" }
+    ]
+  },
+  "footer": {
+    "company": {
+      "name": "DIUK Solution",
+      "logo": "/logofooter.png",
+      "address": "Jl. Rawa Simprug 3, Kebayoran Lama, Jakarta Selatan",
+      "email": "hello@diuk.id",
+      "socialLinks": [
+        { "label": "Instagram", "href": "#" }
+      ]
+    },
+    "links": {
+      "product": [
+        { "label": "Home", "href": "/" },
+        { "label": "Layanan", "href": "#services" },
+        { "label": "Fitur", "href": "#features" },
+        { "label": "Pricing", "href": "#pricing" }
+      ],
+      "contact": {
+        "email": "diuk.solution@gmail.com",
+        "whatsapp": "+62 881-0806-19084"
+      }
+    },
+    "copyright": "Copyright © 2025 DIUK. All rights reserved.",
+    "legal": [
+      { "label": "Terms", "href": "#" },
+      { "label": "Privacy", "href": "#" }
+    ]
+  }
+}
+

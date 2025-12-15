@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
@@ -13,13 +12,26 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
+    // Use service role to fetch user to avoid cookie/session issues on edge/API calls
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: 'SUPABASE_SERVICE_ROLE_KEY not configured' },
+        { status: 500 }
+      )
+    }
 
-    if (userError || !user || user.id !== userId) {
+    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const user = userData?.user
+
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

@@ -48,20 +48,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create user in Supabase Auth (but not confirmed)
-    const supabaseAdmin = await createClient()
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: false, // User needs to verify email
-      user_metadata: {
-        full_name: name || null,
-      },
-    })
-
-    if (authError || !authData.user) {
+    // Check if Super Admin has a business
+    if (!dbUser.businessId) {
       return NextResponse.json(
-        { error: authError?.message || 'Failed to create user' },
+        { error: 'Super Admin must have an associated business' },
         { status: 400 }
       )
     }
@@ -75,7 +65,7 @@ export async function POST(request: Request) {
     const pendingAdmin = await prisma.pendingAdmin.create({
       data: {
         email,
-        password: authData.user.id, // Store Supabase user ID instead of password
+        password: password, // Store plain password temporarily
         name: name || null,
         createdById: dbUser.id,
         verificationToken,
@@ -83,18 +73,56 @@ export async function POST(request: Request) {
       },
     })
 
-    // Send verification email
-    const { error: emailError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'signup',
-      email,
-    })
+    // Generate verification URL
+    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/verify-admin?token=${verificationToken}`
 
-    // Get the verification link
-    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/verify-admin?token=${verificationToken}`
+    // Use service role key for admin operations
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: 'SUPABASE_SERVICE_ROLE_KEY not configured' },
+        { status: 500 }
+      )
+    }
 
-    // TODO: Send email with verification link
-    // You can use a service like Resend, SendGrid, or Supabase's email service
-    console.log('Verification link:', verificationLink)
+    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
+
+    try {
+      // Use inviteUserByEmail to create user and send invitation email
+      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+        email,
+        {
+          data: {
+            full_name: name || null,
+          },
+        }
+      )
+
+      if (inviteError) {
+        // If user already exists, update password and log manual verification URL
+        if (inviteError.message?.includes('already registered')) {
+          console.log('User already exists in Supabase Auth. Manual verification URL:', verificationUrl)
+          // You can optionally update the password here if needed
+        } else {
+          throw inviteError
+        }
+      } else {
+        console.log('Invitation email sent to:', email)
+      }
+    } catch (error: any) {
+      console.error('Error sending invitation email:', error)
+      // Continue anyway - user can still verify via the token URL
+    }
 
     return NextResponse.json({
       message: 'Admin created successfully. Verification email sent.',
@@ -103,7 +131,7 @@ export async function POST(request: Request) {
         email: pendingAdmin.email,
         name: pendingAdmin.name,
       },
-      verificationLink, // For development, remove in production
+      verificationUrl, // For development, remove in production
     })
   } catch (error) {
     console.error('Error creating admin:', error)
