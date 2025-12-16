@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import LogoutButton from '@/components/LogoutButton'
-import Link from 'next/link'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -17,6 +15,9 @@ export default async function DashboardPage() {
   // Check if user exists in database
   const dbUser = await prisma.user.findUnique({
     where: { supabaseId: user.id },
+    include: {
+      business: true,
+    },
   })
 
   if (!dbUser) {
@@ -27,33 +28,67 @@ export default async function DashboardPage() {
   const roleLabel = dbUser.role.replace('_', ' ')
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ background: 'linear-gradient(to bottom right, rgba(48,61,131,0.05), white, rgba(132,204,22,0.06))' }}
-    >
-      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-white shadow" style={{ border: '1px solid rgba(48,61,131,0.15)' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-[#303d83]/10 to-[#84cc16]/20" />
-              <div className="relative h-full w-full flex items-center justify-center font-bold text-[#303d83]">DIUK</div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#303d83' }}>Dashboard</p>
-              <h1 className="text-xl font-bold text-gray-900">Welcome, {dbUser.name || 'User'}</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-semibold text-gray-900">{dbUser.email}</p>
-              <p className="text-xs text-gray-500 capitalize">{roleLabel}</p>
-            </div>
-            <LogoutButton />
-          </div>
+    <div className="flex-1 p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome, {dbUser.name || 'User'}</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Selamat datang di dashboard DIUK
+          </p>
         </div>
-      </header>
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        {/* Business Info Section */}
+        {dbUser.business && (
+          <div className="mb-6 rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em]" style={{ color: '#303d83' }}>
+                  Business
+                </p>
+                <h2 className="text-lg font-bold text-gray-900">Informasi Business</h2>
+              </div>
+              <div className="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#303d83] to-[#84cc16] text-white">
+                Active
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="rounded-lg border border-gray-200 bg-white/70 p-4">
+                <p className="text-xs font-semibold text-gray-500 mb-1">Nama Business</p>
+                <p className="text-lg font-bold text-gray-900">{dbUser.business.nama}</p>
+              </div>
+              {dbUser.business.linkdata && (
+                <div className="rounded-lg border border-gray-200 bg-white/70 p-4">
+                  <p className="text-xs font-semibold text-gray-500 mb-1">Link Data</p>
+                  <a
+                    href={dbUser.business.linkdata}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-semibold text-[#303d83] hover:underline break-all"
+                  >
+                    {dbUser.business.linkdata}
+                  </a>
+                </div>
+              )}
+              <div className="rounded-lg border border-gray-200 bg-white/70 p-4">
+                <p className="text-xs font-semibold text-gray-500 mb-1">Business ID</p>
+                <p className="text-sm font-semibold text-gray-900 break-all">{dbUser.business.id}</p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white/70 p-4">
+                <p className="text-xs font-semibold text-gray-500 mb-1">Bergabung Sejak</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {new Date(dbUser.business.createdAt).toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-[2fr,1fr] gap-6 mb-6">
           <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl p-6">
             <div className="flex items-center justify-between mb-4">
@@ -98,15 +133,6 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {dbUser.role === 'super_admin' && (
-              <Link
-                href="/dashboard/admin"
-                className="flex items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #303d83, #14b8a6, #84cc16)' }}
-              >
-                Kelola Admin
-              </Link>
-            )}
 
             <div className="rounded-xl border border-gray-200 p-4 bg-white/80">
               <p className="text-sm font-semibold text-gray-900">Status</p>
@@ -117,7 +143,7 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
