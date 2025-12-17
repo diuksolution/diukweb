@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     // Create broadcast record
-    const broadcast = await prisma.broadcast.create({
+    let broadcast = await prisma.broadcast.create({
       data: {
         pesan,
         tanggal: tanggal ? new Date(tanggal) : new Date(),
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     // Use env var, fallback to provided webhook URL for development/testing
     const n8nWebhookUrl =
       process.env.N8N_WEBHOOK_URL ||
-      'https://templed-rozanne-nontarred.ngrok-free.dev/webhook-test/send-broadcast'
+      'http://localhost:5678/webhook/send-broadcast'
     if (n8nWebhookUrl) {
       try {
         const headers: Record<string, string> = {
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         // Optional: pass auth header to n8n (e.g. Authorization: Bearer xxx)
         // Set in .env: N8N_WEBHOOK_AUTH="Bearer your-token" (or whatever format n8n expects)
         if (process.env.N8N_WEBHOOK_AUTH) {
-          headers['Authorization'] = process.env.N8N_WEBHOOK_AUTH
+          headers['diuksolution'] = process.env.N8N_WEBHOOK_AUTH
         }
 
         const webhookResponse = await fetch(n8nWebhookUrl, {
@@ -121,11 +121,25 @@ export async function POST(request: Request) {
 
         if (!webhookResponse.ok) {
           console.error('N8N webhook failed:', await webhookResponse.text())
-          // Don't fail the request if webhook fails, just log it
+          // Mark broadcast as failed if webhook returns non-2xx
+          broadcast = await prisma.broadcast.update({
+            where: { id: broadcast.id },
+            data: { status: 'failed' },
+          })
+        } else {
+          // Mark broadcast as sent if webhook succeeds
+          broadcast = await prisma.broadcast.update({
+            where: { id: broadcast.id },
+            data: { status: 'sent' },
+          })
         }
       } catch (webhookError) {
         console.error('Error calling n8n webhook:', webhookError)
-        // Don't fail the request if webhook fails
+        // Mark broadcast as failed if webhook call throws
+        broadcast = await prisma.broadcast.update({
+          where: { id: broadcast.id },
+          data: { status: 'failed' },
+        })
       }
     }
 
