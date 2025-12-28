@@ -76,10 +76,26 @@ export async function POST(request: Request) {
     })
 
     // Prepare data for n8n webhook
+    // Parse sheet ids (menu & reservasi) dari linkdata jika ada
+    let menuSheetId: string | null = null
+    let reservationSheetId: string | null = null
+    const linkdata = dbUser.business?.linkdata || ''
+    if (linkdata) {
+      const gidMatch = linkdata.match(/[#&]gid=(\d+)/)
+      const reservMatch = linkdata.match(/[#&]reservasiGid=(\d+)/)
+      if (gidMatch) menuSheetId = gidMatch[1]
+      if (reservMatch) reservationSheetId = reservMatch[1]
+    }
+
     const n8nPayload = {
       broadcastId: broadcast.id,
       pesan,
       tanggal: broadcast.tanggal.toISOString(),
+      // field flat tambahan untuk kemudahan di n8n
+      businessId: dbUser.business?.id,
+      businessLinkdata: dbUser.business?.linkdata,
+      menuSheetId,
+      reservationSheetId,
       customers: selectedCustomers.map((customer: any) => ({
         nama: customer.nama,
         noWa: customer.noWa,
@@ -88,6 +104,7 @@ export async function POST(request: Request) {
       business: {
         id: dbUser.business?.id,
         nama: dbUser.business?.nama,
+        linkdata: dbUser.business?.linkdata,
       },
       user: {
         id: dbUser.id,

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface BusinessData {
   id: string
   nama: string
   linkdata: string | null
+  prompt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -19,9 +21,16 @@ export default function BusinessPage() {
   const [formData, setFormData] = useState({
     nama: '',
     linkdata: '',
+    prompt: '',
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [sheets, setSheets] = useState<{ id: string; title: string }[]>([])
+  const [menuSheetId, setMenuSheetId] = useState<string>('') // untuk data menu / customer
+  const [reservationSheetId, setReservationSheetId] = useState<string>('') // untuk data reservasi
+  const [tempatSheetId, setTempatSheetId] = useState<string>('') // untuk data tempat
+  const [sheetsLoading, setSheetsLoading] = useState(false)
+  const [sheetsError, setSheetsError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchBusiness()
@@ -43,12 +52,89 @@ export default function BusinessPage() {
       setFormData({
         nama: data.nama || '',
         linkdata: data.linkdata || '',
+        prompt: data.prompt || '',
       })
+
+      // If linkdata already has a spreadsheet, try to load sheets
+      if (data.linkdata) {
+        await loadSheets(data.linkdata)
+
+        // If linkdata contains gid / reservasiGid / tempatGid, preselect that sheet(s)
+        const gidMatch = data.linkdata.match(/[#&]gid=(\d+)/)
+        const reservGidMatch = data.linkdata.match(/[#&]reservasiGid=(\d+)/)
+        const tempatGidMatch = data.linkdata.match(/[#&]tempatGid=(\d+)/)
+        if (gidMatch) setMenuSheetId(gidMatch[1])
+        if (reservGidMatch) setReservationSheetId(reservGidMatch[1])
+        if (tempatGidMatch) setTempatSheetId(tempatGidMatch[1])
+      }
     } catch (error) {
       console.error('Error fetching business:', error)
       setError('Gagal memuat data business')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const extractSpreadsheetId = (url: string): string | null => {
+    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+    return match ? match[1] : null
+  }
+
+  const buildSheetUrl = (baseUrl: string, menuId: string, reservId: string, tempatId: string): string => {
+    const spreadsheetId = extractSpreadsheetId(baseUrl)
+    if (!spreadsheetId) return baseUrl
+    const params: string[] = []
+    if (menuId) params.push(`gid=${menuId}`)
+    if (reservId) params.push(`reservasiGid=${reservId}`)
+    if (tempatId) params.push(`tempatGid=${tempatId}`)
+    const hash = params.join('&')
+    return hash
+      ? `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#${hash}`
+      : `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`
+  }
+
+  const loadSheets = async (link: string) => {
+    if (!link) return
+    try {
+      setSheetsLoading(true)
+      setSheetsError(null)
+
+      const response = await fetch('/api/business/sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ linkdata: link }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Gagal mengambil daftar sheet')
+      }
+
+      setSheets(data.sheets || [])
+
+      // If no sheet selected yet and we have at least one sheet, preselect
+      if (data.sheets && data.sheets.length > 0) {
+        if (!menuSheetId) {
+          setMenuSheetId(data.sheets[0].id)
+        }
+        if (!reservationSheetId) {
+          const second = data.sheets[1]?.id ?? data.sheets[0].id
+          setReservationSheetId(second)
+        }
+        if (!tempatSheetId) {
+          const third = data.sheets[2]?.id ?? data.sheets[0].id
+          setTempatSheetId(third)
+        }
+      }
+    } catch (err: any) {
+      console.error('Error loading sheets:', err)
+      setSheetsError(err.message || 'Gagal mengambil daftar sheet')
+      setSheets([])
+    } finally {
+      setSheetsLoading(false)
     }
   }
 
@@ -59,12 +145,18 @@ export default function BusinessPage() {
     setSuccess(false)
 
     try {
+      // If user selected specific sheets, normalize linkdata to URL yang menyimpan semua sheet IDs
+      let linkdataToSave = formData.linkdata
+      if (formData.linkdata && (menuSheetId || reservationSheetId || tempatSheetId)) {
+        linkdataToSave = buildSheetUrl(formData.linkdata, menuSheetId, reservationSheetId, tempatSheetId)
+      }
+
       const response = await fetch('/api/business', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, linkdata: linkdataToSave }),
       })
 
       if (!response.ok) {
@@ -74,6 +166,11 @@ export default function BusinessPage() {
 
       const updatedBusiness = await response.json()
       setBusiness(updatedBusiness)
+      setFormData({
+        nama: updatedBusiness.nama || '',
+        linkdata: updatedBusiness.linkdata || '',
+        prompt: updatedBusiness.prompt || '',
+      })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (error: any) {
@@ -151,11 +248,122 @@ export default function BusinessPage() {
                   type="url"
                   id="linkdata"
                   value={formData.linkdata}
-                  onChange={(e) => setFormData({ ...formData, linkdata: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, linkdata: e.target.value })
+                    setSheets([])
+                    setMenuSheetId('')
+                    setReservationSheetId('')
+                    setTempatSheetId('')
+                    setSheetsError(null)
+                  }}
+                  onBlur={() => {
+                    if (formData.linkdata) {
+                      loadSheets(formData.linkdata)
+                    }
+                  }}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-transparent transition-all"
-                  placeholder="https://example.com/data"
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
                 />
-                <p className="mt-1 text-xs text-gray-500">Link ke data atau spreadsheet business Anda</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Link ke Google Spreadsheet yang berisi data customer. Setelah diisi, sistem akan membaca daftar sheet di
+                  spreadsheet tersebut.
+                </p>
+
+                {sheetsLoading && (
+                  <p className="mt-2 text-xs text-gray-500">Mengambil daftar sheet...</p>
+                )}
+
+                {sheetsError && (
+                  <p className="mt-2 text-xs text-red-500 text-xs">{sheetsError}</p>
+                )}
+
+                {sheets.length > 0 && (
+                  <>
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Pilih Sheet Menu
+                      </label>
+                      <select
+                        value={menuSheetId}
+                        onChange={(e) => setMenuSheetId(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-transparent transition-all text-sm"
+                      >
+                        {sheets.map((sheet) => (
+                          <option key={sheet.id} value={sheet.id}>
+                            {sheet.title || `Sheet ${sheet.id}`}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Sheet ini akan digunakan aplikasi untuk membaca data menu.
+                      </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Pilih Sheet Customer / Reservasi
+                      </label>
+                      <select
+                        value={reservationSheetId}
+                        onChange={(e) => setReservationSheetId(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-transparent transition-all text-sm"
+                      >
+                        {sheets.map((sheet) => (
+                          <option key={sheet.id} value={sheet.id}>
+                            {sheet.title || `Sheet ${sheet.id}`}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Sheet ini akan digunakan aplikasi untuk membaca data customer dan dipass ke n8n sebagai sheet reservasi.
+                      </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Pilih Sheet Tempat
+                      </label>
+                      <select
+                        value={tempatSheetId}
+                        onChange={(e) => setTempatSheetId(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-transparent transition-all text-sm"
+                      >
+                        {sheets.map((sheet) => (
+                          <option key={sheet.id} value={sheet.id}>
+                            {sheet.title || `Sheet ${sheet.id}`}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Sheet ini akan digunakan aplikasi untuk membaca data tempat.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Prompt
+                </label>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-4 min-h-[100px]">
+                    <p className="text-xs text-gray-700 whitespace-pre-wrap"
+                    style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace' }}>
+                      {formData.prompt ? formData.prompt : <span className="text-gray-400 italic">Belum ada prompt</span>}
+                    </p>
+                  </div>
+                  <Link
+                    href="/dashboard/business/prompt"
+                    className="px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #303d83, #14b8a6)' }}
+                  >
+                    Edit Prompt
+                  </Link>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Prompt yang akan digunakan untuk business ini.
+                </p>
               </div>
             </div>
           </div>
@@ -217,6 +425,7 @@ export default function BusinessPage() {
           </div>
         </form>
       </div>
+
     </div>
   )
 }

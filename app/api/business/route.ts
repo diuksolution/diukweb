@@ -30,6 +30,25 @@ export async function GET() {
   }
 }
 
+// Utility: parse sheet IDs (menu, reservasi, tempat) dari linkdata jika ada
+const parseSheetIdsFromLink = (link?: string | null): { menuSheetId: string | null; reservationSheetId: string | null; tempatSheetId: string | null } => {
+  if (!link) return { menuSheetId: null, reservationSheetId: null, tempatSheetId: null }
+
+  let menuSheetId: string | null = null
+  let reservationSheetId: string | null = null
+  let tempatSheetId: string | null = null
+
+  const gidMatch = link.match(/[#&]gid=(\d+)/)
+  const reservMatch = link.match(/[#&]reservasiGid=(\d+)/)
+  const tempatMatch = link.match(/[#&]tempatGid=(\d+)/)
+
+  if (gidMatch) menuSheetId = gidMatch[1]
+  if (reservMatch) reservationSheetId = reservMatch[1]
+  if (tempatMatch) tempatSheetId = tempatMatch[1]
+
+  return { menuSheetId, reservationSheetId, tempatSheetId }
+}
+
 // PUT - Update business data
 export async function PUT(request: Request) {
   try {
@@ -52,19 +71,71 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    const { nama, linkdata } = body
+    const { nama, linkdata, prompt } = body as { nama?: string; linkdata?: string | null; prompt?: string | null }
 
     if (!nama || nama.trim() === '') {
       return NextResponse.json({ error: 'Nama business is required' }, { status: 400 })
     }
 
+    const normalizedLink =
+      linkdata && linkdata.trim() !== '' ? linkdata.trim() : null
+
+    const normalizedPrompt =
+      prompt && prompt.trim() !== '' ? prompt.trim() : null
+
     const updatedBusiness = await prisma.business.update({
       where: { id: dbUser.business.id },
       data: {
         nama: nama.trim(),
-        linkdata: linkdata && linkdata.trim() !== '' ? linkdata.trim() : null,
+        linkdata: normalizedLink,
+        prompt: normalizedPrompt,
       },
     })
+
+    // After updating business, trigger optional n8n init webhook (non-blocking)
+    const n8nInitUrl = process.env.N8N_WEBHOOK_URL_INIT
+    if (n8nInitUrl) {
+      try {
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+
+        if (process.env.N8N_WEBHOOK_AUTH_INIT) {
+          headers['diuksolution'] = process.env.N8N_WEBHOOK_AUTH_INIT
+        }
+
+        const { menuSheetId, reservationSheetId, tempatSheetId } = parseSheetIdsFromLink(updatedBusiness.linkdata)
+
+        const payload = {
+          business: {
+            id: updatedBusiness.id,
+            nama: updatedBusiness.nama,
+            linkdata: updatedBusiness.linkdata,
+            prompt: updatedBusiness.prompt,
+            menuSheetId,
+            reservationSheetId,
+            tempatSheetId,
+          },
+          user: {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name,
+          },
+        }
+
+        const resp = await fetch(n8nInitUrl, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+        })
+
+        if (!resp.ok) {
+          console.error('N8N init webhook failed:', await resp.text())
+        }
+      } catch (webhookError) {
+        console.error('Error calling n8n init webhook:', webhookError)
+      }
+    }
 
     return NextResponse.json(updatedBusiness)
   } catch (error) {

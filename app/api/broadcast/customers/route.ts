@@ -32,10 +32,14 @@ export async function GET() {
     }
 
     const spreadsheetId = match[1]
-    
-    // Extract gid if present in URL (for specific sheet tab)
+
+    // Extract gid for sheet yang akan dipakai:
+    // - Kalau ada reservasiGid → pakai itu (sheet kedua / reservasi)
+    // - Kalau tidak ada, fallback ke gid biasa
+    // - Kalau tidak ada juga, fallback ke '0'
+    const reservGidMatch = spreadsheetUrl.match(/[#&]reservasiGid=(\d+)/)
     const gidMatch = spreadsheetUrl.match(/[#&]gid=(\d+)/)
-    const gid = gidMatch ? gidMatch[1] : '0'
+    const gid = reservGidMatch ? reservGidMatch[1] : gidMatch ? gidMatch[1] : '0'
 
     // Try to fetch as CSV - this works if spreadsheet is public
     const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`
