@@ -9,6 +9,7 @@ interface BusinessData {
   nama: string
   linkdata: string | null
   prompt: string | null
+  idDriveGambarMenu: string | null
   createdAt: string
   updatedAt: string
 }
@@ -22,6 +23,7 @@ export default function BusinessPage() {
     nama: '',
     linkdata: '',
     prompt: '',
+    idDriveGambarMenu: '',
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -53,6 +55,7 @@ export default function BusinessPage() {
         nama: data.nama || '',
         linkdata: data.linkdata || '',
         prompt: data.prompt || '',
+        idDriveGambarMenu: data.idDriveGambarMenu || '',
       })
 
       // If linkdata already has a spreadsheet, try to load sheets
@@ -151,12 +154,15 @@ export default function BusinessPage() {
         linkdataToSave = buildSheetUrl(formData.linkdata, menuSheetId, reservationSheetId, tempatSheetId)
       }
 
+      const payload = { ...formData, linkdata: linkdataToSave }
+      console.log('Sending update payload:', payload)
+      
       const response = await fetch('/api/business', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, linkdata: linkdataToSave }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
@@ -165,11 +171,13 @@ export default function BusinessPage() {
       }
 
       const updatedBusiness = await response.json()
+      console.log('Received updated business:', updatedBusiness)
       setBusiness(updatedBusiness)
       setFormData({
         nama: updatedBusiness.nama || '',
         linkdata: updatedBusiness.linkdata || '',
         prompt: updatedBusiness.prompt || '',
+        idDriveGambarMenu: updatedBusiness.idDriveGambarMenu || '',
       })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
@@ -343,6 +351,23 @@ export default function BusinessPage() {
               </div>
 
               <div>
+                <label htmlFor="idDriveGambarMenu" className="block text-sm font-semibold text-gray-700 mb-2">
+                  ID Drive Gambar Menu
+                </label>
+                <input
+                  type="text"
+                  id="idDriveGambarMenu"
+                  value={formData.idDriveGambarMenu}
+                  onChange={(e) => setFormData({ ...formData, idDriveGambarMenu: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-transparent transition-all"
+                  placeholder="Masukkan ID Drive gambar menu"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  ID dari Google Drive yang berisi gambar menu untuk business ini.
+                </p>
+              </div>
+
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Prompt
                 </label>
@@ -350,7 +375,7 @@ export default function BusinessPage() {
                   <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-4 min-h-[100px]">
                     <p className="text-xs text-gray-700 whitespace-pre-wrap"
                     style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace' }}>
-                      {formData.prompt ? formData.prompt : <span className="text-gray-400 italic">Belum ada prompt</span>}
+                      {formData.prompt ? formData.prompt.slice(0, 100) + '........' : <span className="text-gray-400 italic">Belum ada prompt</span>}
                     </p>
                   </div>
                   <Link

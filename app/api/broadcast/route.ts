@@ -105,6 +105,7 @@ export async function POST(request: Request) {
         id: dbUser.business?.id,
         nama: dbUser.business?.nama,
         linkdata: dbUser.business?.linkdata,
+        idDriveGambarMenu: dbUser.business?.idDriveGambarMenu,
       },
       user: {
         id: dbUser.id,

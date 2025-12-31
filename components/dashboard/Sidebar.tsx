@@ -130,7 +130,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
       {/* Menu Items */}
       <nav className="flex-1 p-4 space-y-2">
         {filteredMenuItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+          const isActive = pathname === item.href
           return (
             <Link
               key={item.href}

@@ -71,7 +71,9 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    const { nama, linkdata, prompt } = body as { nama?: string; linkdata?: string | null; prompt?: string | null }
+    const { nama, linkdata, prompt, idDriveGambarMenu } = body as { nama?: string; linkdata?: string | null; prompt?: string | null; idDriveGambarMenu?: string | null }
+    
+    console.log('Business update request body:', { nama, linkdata, prompt, idDriveGambarMenu })
 
     if (!nama || nama.trim() === '') {
       return NextResponse.json({ error: 'Nama business is required' }, { status: 400 })
@@ -83,14 +85,20 @@ export async function PUT(request: Request) {
     const normalizedPrompt =
       prompt && prompt.trim() !== '' ? prompt.trim() : null
 
+    const normalizedIdDriveGambarMenu =
+      idDriveGambarMenu && idDriveGambarMenu.trim() !== '' ? idDriveGambarMenu.trim() : null
+
     const updatedBusiness = await prisma.business.update({
       where: { id: dbUser.business.id },
       data: {
         nama: nama.trim(),
         linkdata: normalizedLink,
         prompt: normalizedPrompt,
+        idDriveGambarMenu: normalizedIdDriveGambarMenu,
       },
     })
+    
+    console.log('Updated business:', { id: updatedBusiness.id, idDriveGambarMenu: updatedBusiness.idDriveGambarMenu })
 
     // After updating business, trigger optional n8n init webhook (non-blocking)
     const n8nInitUrl = process.env.N8N_WEBHOOK_URL_INIT
@@ -112,6 +120,7 @@ export async function PUT(request: Request) {
             nama: updatedBusiness.nama,
             linkdata: updatedBusiness.linkdata,
             prompt: updatedBusiness.prompt,
+            idDriveGambarMenu: updatedBusiness.idDriveGambarMenu,
             menuSheetId,
             reservationSheetId,
             tempatSheetId,

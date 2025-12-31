@@ -8,6 +8,7 @@ interface BusinessData {
   nama: string
   linkdata: string | null
   prompt: string | null
+  idDriveGambarMenu: string | null
 }
 
 export default function BusinessPromptPage() {
@@ -61,6 +62,7 @@ export default function BusinessPromptPage() {
           nama: business?.nama || '',
           linkdata: business?.linkdata || null,
           prompt: prompt.trim() || null,
+          idDriveGambarMenu: business?.idDriveGambarMenu || null,
         }),
       })
 
