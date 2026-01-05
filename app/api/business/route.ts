@@ -101,8 +101,10 @@ export async function PUT(request: Request) {
     console.log('Updated business:', { id: updatedBusiness.id, idDriveGambarMenu: updatedBusiness.idDriveGambarMenu })
 
     // After updating business, trigger optional n8n init webhook (non-blocking)
+    // Always trigger webhook when saving from business page
     const n8nInitUrl = process.env.N8N_WEBHOOK_URL_INIT
     if (n8nInitUrl) {
+      console.log('Triggering webhook...')
       try {
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
@@ -139,11 +141,16 @@ export async function PUT(request: Request) {
         })
 
         if (!resp.ok) {
-          console.error('N8N init webhook failed:', await resp.text())
+          const errorText = await resp.text()
+          console.error('N8N init webhook failed:', errorText)
+        } else {
+          console.log('N8N init webhook triggered successfully')
         }
       } catch (webhookError) {
         console.error('Error calling n8n init webhook:', webhookError)
       }
+    } else {
+      console.log('Webhook not triggered: N8N_WEBHOOK_URL_INIT not set')
     }
 
     return NextResponse.json(updatedBusiness)

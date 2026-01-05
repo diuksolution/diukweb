@@ -46,6 +46,7 @@ export default function Footer() {
                     key={index}
                     href={link.href || '#'}
                     className="flex items-center gap-2 text-sm text-gray-400 hover:text-lime-400 transition-all duration-300"
+                    target="_blank"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
