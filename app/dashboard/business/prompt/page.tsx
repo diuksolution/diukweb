@@ -88,7 +88,7 @@ export default function BusinessPromptPage() {
   if (loading) {
     return (
       <div className="flex-1 p-6 lg:p-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="">
           <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl p-6">
             <p className="text-gray-500 text-center py-12">Memuat data...</p>
           </div>
@@ -99,7 +99,7 @@ export default function BusinessPromptPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="">
         {/* Header with gradient */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">

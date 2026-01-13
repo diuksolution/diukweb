@@ -15,7 +15,9 @@ async function main() {
 
   // Daftar Business yang akan di-seed
   const businessData = {
-    nama: 'DIUK Business',
+    // nama: 'DIUK Business',
+    // linkdata: 'https://docs.google.com/spreadsheets/d/1kvNxHzWoZHmi1IGadjN03qQwAkA9oLI8UMqNBpSWOj8/edit?gid=484285918#gid=484285918',
+    nama: 'KASIKO COFFEE & EATERY',
     linkdata: 'https://docs.google.com/spreadsheets/d/1kvNxHzWoZHmi1IGadjN03qQwAkA9oLI8UMqNBpSWOj8/edit?gid=484285918#gid=484285918',
   }
 
@@ -41,9 +43,14 @@ async function main() {
   // Daftar Super Admin yang akan di-seed
   // Ganti dengan email Google yang valid
   const superAdmins = [
+    // {
+    //   email: 'alghifarirasyidzola@gmail.com', // Ganti dengan email Google Super Admin Anda
+    //   name: 'Alghifari Rasyid Zola',
+    //   supabaseId: 'temp-id-will-be-updated', // Akan di-update setelah user login via Google
+    // },
     {
-      email: 'alghifarirasyidzola@gmail.com', // Ganti dengan email Google Super Admin Anda
-      name: 'Alghifari Rasyid Zola',
+      email: 'kasikocoffeeatery@gmail.com', // Ganti dengan email Google Super Admin Anda
+      name: 'KASIKO COFFEE & EATERY',
       supabaseId: 'temp-id-will-be-updated', // Akan di-update setelah user login via Google
     },
   ]

@@ -159,7 +159,7 @@ export default function BroadcastPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="">
         {/* Header with gradient */}
         <div className="mb-8 flex justify-between items-start">
           <div className="flex items-center gap-3">

@@ -58,7 +58,7 @@ export default function CustomerPage() {
 
   return (
     <div className="flex-1 p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="">
         {/* Header with gradient */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
