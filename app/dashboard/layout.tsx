@@ -32,7 +32,7 @@ export default async function DashboardLayout({
       style={{ background: 'linear-gradient(to bottom right, rgba(48,61,131,0.05), white, rgba(132,204,22,0.06))' }}
     >
       <Sidebar userRole={dbUser.role} />
-      <div className="flex-1 flex flex-col lg:ml-64">
+      <div className="flex-1 flex flex-col lg:ml-64 w-screen max-w-screen overflow-x-hidden">
         {children}
       </div>
     </div>
