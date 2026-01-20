@@ -138,7 +138,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <div className="w-12 h-12 items-center justify-center">
-              <Image src="/logodashboard.png" alt="Logo" width={300} height={300} className="object-contain w-full h-full" />
+              <Image src="/logoDashboard.png" alt="Logo" width={300} height={300} className="object-contain w-full h-full" />
             </div>
             <div>
               <p className="text-md font-semibold uppercase tracking-[0.2em]" style={{ color: '#303d83' }}>Dashboard</p>
