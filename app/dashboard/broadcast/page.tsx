@@ -37,6 +37,42 @@ export default function BroadcastPage() {
     fetchBroadcasts()
   }, [])
 
+  // Merge customers by ID WA, keep the latest name if names differ
+  const mergeCustomersByIdWa = (rawCustomers: Customer[]): Customer[] => {
+    const customerMap = new Map<string, Customer>()
+    
+    // Sort by index to ensure we process in order (latest first if needed)
+    const sortedCustomers = [...rawCustomers].sort((a, b) => b.index - a.index)
+    
+    for (const customer of sortedCustomers) {
+      const idWa = customer.idWa?.trim() || ''
+      
+      if (!idWa) {
+        // If no ID WA, keep as separate customer
+        customerMap.set(`no-id-${customer.index}`, customer)
+        continue
+      }
+      
+      const normalizedIdWa = idWa.toLowerCase().replace(/\s/g, '')
+      
+      if (customerMap.has(normalizedIdWa)) {
+        const existing = customerMap.get(normalizedIdWa)!
+        // Update name to latest if different
+        if (customer.nama && customer.nama !== existing.nama) {
+          existing.nama = customer.nama
+        }
+        // Update noWa if missing in existing
+        if (!existing.noWa && customer.noWa) {
+          existing.noWa = customer.noWa
+        }
+      } else {
+        customerMap.set(normalizedIdWa, { ...customer })
+      }
+    }
+    
+    return Array.from(customerMap.values())
+  }
+
   const fetchCustomers = async () => {
     try {
       setLoading(true)
@@ -57,7 +93,9 @@ export default function BroadcastPage() {
         return
       }
       
-      setCustomers(data.customers || [])
+      const rawCustomers = data.customers || []
+      const mergedCustomers = mergeCustomersByIdWa(rawCustomers)
+      setCustomers(mergedCustomers)
     } catch (error: any) {
       console.error('Error fetching customers:', error)
       setError(error.message || 'Gagal memuat data customer')

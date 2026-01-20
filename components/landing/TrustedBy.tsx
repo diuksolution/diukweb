@@ -2,6 +2,7 @@
 
 import landingData from '@/data/landing-page.json'
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation'
+import Image from 'next/image'
 
 export default function TrustedBy() {
   const { trustedBy } = landingData
@@ -10,44 +11,104 @@ export default function TrustedBy() {
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-y border-gray-200">
       <div className="container mx-auto max-w-7xl">
-        <p 
+        <p
           className={`text-center text-gray-600 mb-12 text-lg transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
           {trustedBy.title}
         </p>
-        
-        {/* Brands Grid */}
-        <div ref={ref} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
-          {trustedBy.brands.map((brand, index) => (
-            <div
-              key={index}
-              className={`flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100 group cursor-pointer ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-              style={{ 
-                transitionDelay: `${index * 0.05}s`,
-                animation: isVisible ? `fadeInUp 0.6s ease-out ${index * 0.05}s forwards` : 'none'
-              }}
-            >
-              <div 
-                className="w-24 h-16 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center group-hover:border-lime-500/50 transition-all duration-300 shadow-sm group-hover:shadow-md"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(to bottom right, rgba(48,61,131,0.1), rgba(132,204,22,0.1))'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f9fafb'
-                }}
-              >
-                <span className="text-xs text-gray-600 group-hover:text-gray-900 font-medium text-center px-2 transition-colors">
-                  {brand.name}
-                </span>
+
+        {/* Brands Marquee (logos only) */}
+        <div
+          ref={ref}
+          className={`relative overflow-hidden transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+        >
+          {/* Edge fade */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-24 bg-linear-to-r from-white to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-24 bg-linear-to-l from-white to-transparent z-10" />
+
+          <div className="marquee">
+            <div className="track flex w-max items-center py-2">
+              {/* Group A */}
+              <div className="group flex items-center gap-10 sm:gap-14">
+                {trustedBy.brands.map((brand) => (
+                  <div
+                    key={`a-${brand.name}`}
+                    className="shrink-0 flex items-center justify-center grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
+                  >
+                    <div className="h-16 w-36 sm:h-18 sm:w-48">
+                      <Image
+                        src={brand.logo}
+                        alt={brand.name}
+                        width={160}
+                        height={80}
+                        className="h-full w-full object-contain"
+                        priority={false}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Group B (duplicate for seamless loop) */}
+              <div className="group flex items-center gap-10 sm:gap-14" aria-hidden="true">
+                {trustedBy.brands.map((brand) => (
+                  <div
+                    key={`b-${brand.name}`}
+                    className="shrink-0 flex items-center justify-center grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
+                  >
+                    <div className="h-16 w-36 sm:h-18 sm:w-48">
+                      <Image
+                        src={brand.logo}
+                        alt=""
+                        width={160}
+                        height={80}
+                        className="h-full w-full object-contain"
+                        priority={false}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .marquee {
+          --duration: 28s;
+        }
+
+        .marquee:hover .track {
+          animation-play-state: paused;
+        }
+
+        .track {
+          animation: marquee var(--duration) linear infinite;
+          will-change: transform;
+          transform: translate3d(0, 0, 0);
+        }
+
+        @keyframes marquee {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .track {
+            animation: none;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </section>
   )
 }

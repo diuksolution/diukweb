@@ -122,7 +122,8 @@ export async function GET() {
       return NextResponse.json({ places: [], dates: [] })
     }
 
-    // First row is headers - first column is "Tanggal", rest are place names
+    // First row is headers - one column should be "Tanggal", the rest are place names
+    // Note: some header cells can be empty; those columns should be skipped.
     const headers = rows[0].map(h => h.replace(/^"|"$/g, '').trim())
     
     // Find tanggal column index (should be first column, but we'll search for it)
@@ -134,16 +135,18 @@ export async function GET() {
     // If tanggal column not found, assume first column is tanggal
     const tanggalColIndex = tanggalIndex >= 0 ? tanggalIndex : 0
 
-    // Place names are all columns except tanggal column
-    const placeNames = headers.filter((_, index) => index !== tanggalColIndex)
+    // Place columns: all columns except tanggal column, and skip empty headers
+    const placeColumns = headers
+      .map((name, index) => ({ name: name.trim(), index }))
+      .filter(({ name, index }) => index !== tanggalColIndex && name.length > 0)
 
     // Parse data rows
     const placesData: Record<string, Record<string, number>> = {}
     const dates: string[] = []
 
     // Initialize places data structure
-    placeNames.forEach(place => {
-      placesData[place] = {}
+    placeColumns.forEach(({ name }) => {
+      placesData[name] = {}
     })
 
     // Process data rows (skip header row)
@@ -186,16 +189,12 @@ export async function GET() {
         dates.push(normalizedDate)
       }
 
-      // Process each place column
-      placeNames.forEach((place, placeIndex) => {
-        // Calculate actual column index (accounting for tanggal column position)
-        const actualColIndex = placeIndex < tanggalColIndex ? placeIndex : placeIndex + 1
-        
-        if (values.length > actualColIndex) {
-          const value = values[actualColIndex]?.trim() || '0'
-          // Try to parse as number
+      // Process each place column (use original column index so skipping empty headers won't shift mapping)
+      placeColumns.forEach(({ name, index: colIndex }) => {
+        if (values.length > colIndex) {
+          const value = values[colIndex]?.trim() || '0'
           const numValue = parseFloat(value) || 0
-          placesData[place][normalizedDate] = numValue
+          placesData[name][normalizedDate] = numValue
         }
       })
     }
@@ -225,11 +224,11 @@ export async function GET() {
     })
 
     // Format response - ensure dates in availability are also normalized
-    const places = placeNames.map(placeName => ({
-      name: placeName,
+    const places = placeColumns.map(({ name }) => ({
+      name,
       availability: normalizedDates.map(date => ({
         date,
-        available: placesData[placeName][date] || 0,
+        available: placesData[name][date] || 0,
       })),
     }))
 

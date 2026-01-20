@@ -6,9 +6,10 @@ import landingData from '@/data/landing-page.json'
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation'
 
 export default function Footer() {
-  const { footer } = landingData
+  const { footer, header } = landingData
   const { ref, isVisible } = useScrollAnimation({ triggerOnce: true })
   const email = footer.links.contact?.email || footer.company?.email
+  const wa = header.whatsapp?.number || ''
   const whatsappNumber = footer.links.contact?.whatsapp || ''
   const whatsappUrl = whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined
 
@@ -111,7 +112,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="hover:text-lime-400 transition-all duration-300 hover:translate-x-2 inline-block"
                   >
-                    WhatsApp: +{whatsappNumber}
+                    WhatsApp: {wa}
                   </Link>
                 </li>
               )}

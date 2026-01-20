@@ -15,7 +15,7 @@
       "signup": { "label": "Daftar Sekarang", "href": "/login" }
     },
     "whatsapp": {
-      "number": "62881080619084",
+      "number": "+62 881-0806-19084",
       "label": "Hubungi Kami"
     }
   },
@@ -30,20 +30,14 @@
     "trustedBy": "Let AI do the work for your business."
   },
   "trustedBy": {
-    "title": "Trusted by 3,000+ businesses and leading brands",
+    "title": "Dipercaya oleh berbagai bisnis",
     "brands": [
-      { "name": "Astra", "logo": "/brands/astra.svg" },
-      { "name": "Santo", "logo": "/brands/santo.svg" },
-      { "name": "Royal Parking", "logo": "/brands/royal-parking.svg" },
-      { "name": "Sominer", "logo": "/brands/sominer.svg" },
-      { "name": "Dr W Skincare", "logo": "/brands/dr-w.svg" },
-      { "name": "Scarlett", "logo": "/brands/scarlett.svg" },
-      { "name": "Ekles", "logo": "/brands/ekles.svg" },
-      { "name": "Dokter Hub", "logo": "/brands/dokter-hub.svg" },
-      { "name": "Meval", "logo": "/brands/meval.svg" },
-      { "name": "SB Dental", "logo": "/brands/sb-dental.svg" },
-      { "name": "Darius Tour", "logo": "/brands/darius-tour.svg" },
-      { "name": "Kreasie Edu", "logo": "/brands/kreasie-edu.svg" }
+      { "name": "Kasiko Coffee", "logo": "/brands/kasiko.png" },
+      { "name": "Santo", "logo": "/brands/kasiko.png" },
+      { "name": "Royal Parking", "logo": "/brands/kasiko.png" },
+      { "name": "Sominer", "logo": "/brands/kasiko.png" },
+      { "name": "Dr W Skincare", "logo": "/brands/kasiko.png" },
+      { "name": "Scarlett", "logo": "/brands/kasiko.png" }
     ]
   },
   "businessChallenges": {
@@ -265,6 +259,67 @@
       ]
     }
   },
+  "featureShowcase": {
+    "title": "Fitur DIUK untuk bantu bisnis jalan otomatis",
+    "subtitle": "Pilih fitur untuk lihat contoh tampilannya.",
+    "items": [
+      {
+        "key": "smart-reservation",
+        "title": "Smart Reservation",
+        "description": "Otomatisasi booking/reservasi dari chat. AI bisa bantu ambil data, cek ketersediaan, dan konfirmasi jadwal lebih cepat.",
+        "bullets": [
+          "Ambil data booking (nama, tanggal, jam, kebutuhan)",
+          "Konfirmasi otomatis & minim human error",
+          "Lebih cepat respon, lebih banyak yang jadi"
+        ],
+        "image": "/fitur/reservasi.png"
+      },
+      {
+        "key": "smart-crm-tools",
+        "title": "Smart CRM Tools",
+        "description": "Leads dan customer tersimpan rapi. Tim bisa follow-up, tracking status, dan lihat history chat dalam satu tempat.",
+        "bullets": [
+          "Leads auto-saved ke dashboard/CRM",
+          "History belanja customer",
+          "Pipeline lebih terukur untuk closing"
+        ],
+        "image": "/fitur/crm.png"
+      },
+      {
+        "key": "professional-website",
+        "title": "Professional Website",
+        "description": "Website profile yang rapi dan modern untuk ningkatin kredibilitas. Nyambung ke CTA dan funnel bisnis kamu.",
+        "bullets": [
+          "Tampilan modern & mobile-friendly",
+          "CTA yang jelas untuk convert",
+          "Mudah dipakai buat campaign/iklan"
+        ],
+        "image": "/fitur/website.png"
+      },
+      {
+        "key": "smart-broadcast",
+        "title": "Smart Broadcast",
+        "description": "Kirim campaign/broadcast dengan lebih aman dan terarah. Segmentasi customer bikin pesan lebih relevan dan efektif.",
+        "bullets": [
+          "Segmentasi customer sesuai kebutuhan",
+          "Template pesan yang konsisten",
+          "Bantu re-activate leads lama"
+        ],
+        "image": "/fitur/bc.png"
+      },
+      {
+        "key": "ai-customer-agent",
+        "title": "AI Customer Agent",
+        "description": "AI agent yang jawab chat 24/7 dengan gaya natural. Bisa handle pertanyaan umum, edukasi, sampai bantu arahkan ke produk yang tepat.",
+        "bullets": [
+          "Respon instan 24/7",
+          "Jawaban konsisten & scalable",
+          "Bantu naikkin conversion rate"
+        ],
+        "image": "/logoDashboard.png"
+      }
+    ]
+  },
   "pricing": {
     "title": "HARGA LAYANAN KAMI",
     "subtitle": "Paket AI Agent, Website, dan Combo untuk bisnis Anda",
@@ -385,7 +440,7 @@
     {
       "badge": "🎯 Advanced Feature",
       "title": "Ticketing System & Sales Pipeline",
-      "description": "Manage every interaction in a visual pipeline - from lead to after‑sales support.",
+      "description": "Manage every interaction in a visual pipeline - from lead to after-sales support.",
       "subFeatures": [
         {
           "title": "Multiple Boards",
@@ -504,7 +559,7 @@
       ],
       "contact": {
         "email": "diuk.solution@gmail.com",
-        "whatsapp": "+62 881-0806-19084"
+        "whatsapp": "62881080619084"
       }
     },
     "copyright": "Copyright © 2025 DIUK. All rights reserved.",

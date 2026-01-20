@@ -11,6 +11,9 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "DIUK - AI Customer Service & Sales Platform",
   description: "Save Time, Cut Costs, and 10X Your Sales with AI Sales Agents. Trusted by 3,000+ businesses.",
+  icons: {
+    icon: "/logoDashboard.png",
+  },
 };
 
 export default function RootLayout({

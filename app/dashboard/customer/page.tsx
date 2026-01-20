@@ -8,6 +8,12 @@ interface Customer {
   noWa: string
   idWa: string
   index: number
+  _originalIndices?: number[]
+}
+
+interface Reservation {
+  [key: string]: any
+  _reservationDate: string | null
 }
 
 export default function CustomerPage() {
@@ -16,6 +22,9 @@ export default function CustomerPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [customerHistory, setCustomerHistory] = useState<{ reservations: Reservation[], menus: Array<{ name: string, count: number }> } | null>(null)
+  const [loadingHistory, setLoadingHistory] = useState(false)
 
   useEffect(() => {
     fetchCustomers()
@@ -41,12 +50,95 @@ export default function CustomerPage() {
         return
       }
       
-      setCustomers(data.customers || [])
+      const rawCustomers = data.customers || []
+      
+      // Merge customers by ID WA
+      const mergedCustomers = mergeCustomersByIdWa(rawCustomers)
+      setCustomers(mergedCustomers)
     } catch (error: any) {
       console.error('Error fetching customers:', error)
       setError(error.message || 'Gagal memuat data customer')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Merge customers by ID WA, keep the latest name if names differ
+  const mergeCustomersByIdWa = (rawCustomers: Customer[]): Customer[] => {
+    const customerMap = new Map<string, Customer>()
+    
+    // Sort by index to ensure we process in order (latest first if needed)
+    const sortedCustomers = [...rawCustomers].sort((a, b) => b.index - a.index)
+    
+    for (const customer of sortedCustomers) {
+      const idWa = customer.idWa?.trim() || ''
+      
+      if (!idWa) {
+        // If no ID WA, keep as separate customer
+        customerMap.set(`no-id-${customer.index}`, customer)
+        continue
+      }
+      
+      const normalizedIdWa = idWa.toLowerCase().replace(/\s/g, '')
+      
+      if (customerMap.has(normalizedIdWa)) {
+        const existing = customerMap.get(normalizedIdWa)!
+        // Update name to latest if different
+        if (customer.nama && customer.nama !== existing.nama) {
+          existing.nama = customer.nama
+        }
+        // Update noWa if missing in existing
+        if (!existing.noWa && customer.noWa) {
+          existing.noWa = customer.noWa
+        }
+        // Track original indices
+        if (!existing._originalIndices) {
+          existing._originalIndices = [existing.index]
+        }
+        existing._originalIndices.push(customer.index)
+      } else {
+        customerMap.set(normalizedIdWa, { ...customer })
+      }
+    }
+    
+    return Array.from(customerMap.values())
+  }
+
+  const fetchCustomerHistory = async (customer: Customer) => {
+    if (!customer.idWa) return
+    
+    setLoadingHistory(true)
+    try {
+      const response = await fetch(`/api/customer/history?idWa=${encodeURIComponent(customer.idWa)}`)
+      const data = await response.json()
+      
+      if (response.ok) {
+        setCustomerHistory(data)
+      }
+    } catch (error) {
+      console.error('Error fetching customer history:', error)
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
+  const handleCustomerClick = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setCustomerHistory(null)
+    fetchCustomerHistory(customer)
+  }
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '-'
+    try {
+      const date = new Date(dateStr + 'T00:00:00')
+      if (isNaN(date.getTime())) return dateStr
+      const day = String(date.getDate()).padStart(2, '0')
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const year = date.getFullYear()
+      return `${day}/${month}/${year}`
+    } catch {
+      return dateStr
     }
   }
 
@@ -202,7 +294,11 @@ export default function CustomerPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredCustomers.map((customer, idx) => (
-                    <tr key={customer.index} className="hover:bg-gradient-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 transition-all duration-200">
+                    <tr 
+                      key={customer.index} 
+                      onClick={() => handleCustomerClick(customer)}
+                      className="hover:bg-gradient-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 transition-all duration-200 cursor-pointer"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-semibold text-gray-500">{idx + 1}</span>
                       </td>
@@ -228,6 +324,139 @@ export default function CustomerPage() {
           )}
         </div>
       </div>
+
+      {/* Customer Detail Modal */}
+      {selectedCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedCustomer(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-[#303d83]/10 via-[#14b8a6]/10 to-[#84cc16]/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#303d83] to-[#14b8a6] flex items-center justify-center text-white text-2xl font-bold">
+                    {selectedCustomer.nama.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedCustomer.nama}</h2>
+                    <div className="flex items-center gap-4 mt-1">
+                      {selectedCustomer.idWa && (
+                        <span className="text-sm text-gray-600 font-mono">ID WA: {selectedCustomer.idWa}</span>
+                      )}
+                      {selectedCustomer.noWa && (
+                        <span className="text-sm text-gray-600 font-mono">No WA: {selectedCustomer.noWa}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedCustomer(null)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingHistory ? (
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center gap-2 text-gray-500">
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="font-medium">Memuat riwayat...</span>
+                  </div>
+                </div>
+              ) : customerHistory ? (
+                <div className="space-y-6">
+                  {/* Menu yang pernah dipesan */}
+                  {customerHistory.menus.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-[#303d83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Menu yang Pernah Dipesan
+                      </h3>
+                      <div className="rounded-xl border border-gray-200 overflow-hidden">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gradient-to-r from-gray-50 to-white">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-[0.1em]">
+                                Menu
+                              </th>
+                              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-[0.1em]">
+                                Jumlah
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {customerHistory.menus.map((menu, idx) => (
+                              <tr key={idx} className="hover:bg-gradient-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 transition-all duration-200">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className="text-sm font-semibold text-gray-900">{menu.name}</span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                  <span className="text-sm font-bold text-[#303d83]">{menu.count}</span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Riwayat Transaksi */}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-[#303d83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                      Riwayat Transaksi ({customerHistory.reservations.length})
+                    </h3>
+                    {customerHistory.reservations.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">Belum ada riwayat transaksi</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {customerHistory.reservations.map((reservation, idx) => (
+                          <div key={idx} className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 hover:border-[#303d83]/30 transition-all">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {reservation._reservationDate && (
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="text-sm font-semibold text-gray-700">Tanggal: {formatDate(reservation._reservationDate)}</span>
+                                </div>
+                              )}
+                              {Object.entries(reservation).filter(([key]) => !key.startsWith('_')).map(([key, value]) => {
+                                if (!value || key === 'index') return null
+                                return (
+                                  <div key={key} className="text-sm">
+                                    <span className="font-semibold text-gray-600">{key}:</span>{' '}
+                                    <span className="text-gray-900">{String(value)}</span>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-12">Tidak ada data riwayat</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
