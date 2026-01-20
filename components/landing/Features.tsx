@@ -40,7 +40,7 @@ export default function Features() {
             <div className="relative">
 
               {/* 5 Steps Grid with Varied Layouts */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-16">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-16">
                 {features.whatDiukDoes.steps.map((step: any, index: number) => {
                   const { ref, isVisible } = useScrollAnimation({ triggerOnce: true, threshold: 0.2 })
                   const isEven = index % 2 === 0
@@ -129,7 +129,7 @@ export default function Features() {
             {/* Workflow Flow - Clean Horizontal Layout */}
             <div className="relative">
               {/* Desktop: Horizontal Flow */}
-              <div className="hidden lg:flex items-center justify-center gap-4 relative">
+              <div className="hidden lg:flex items-center justify-center gap-0 relative">
                 {features.workflow.steps.map((step: any, index: number) => {
                   const { ref, isVisible } = useScrollAnimation({ triggerOnce: true, threshold: 0.1 })
                   const isLast = index === features.workflow.steps.length - 1
@@ -153,7 +153,7 @@ export default function Features() {
                         </div>
                         
                         {/* Step Content Card */}
-                        <div className="w-56 bg-white rounded-xl p-4 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:border-lime-400 transition-all duration-300 text-center">
+                        <div className="w-56 bg-white rounded-xl p-4 border-2 border-gray-200 shadow-lg hover:shadow-xl hover:border-lime-400 transition-all duration-300 text-center h-68">
                           {/* Image */}
                           {step.image && (
                             <div className="relative w-30 h-30 mx-auto mb-3">
@@ -180,8 +180,8 @@ export default function Features() {
 
                       {/* Flow Arrow */}
                       {!isLast && (
-                        <div className="flex items-center mx-2">
-                          <div className="w-8 h-0.5" style={{ background: 'linear-gradient(to right, #84cc16, #14b8a6)' }}></div>
+                        <div className="flex items-center mx-1">
+                          <div className="w-5 h-0.5" style={{ background: 'linear-gradient(to right, #84cc16, #14b8a6)' }}></div>
                           <div className="w-0 h-0 border-l-6 border-l-lime-400 border-t-3 border-t-transparent border-b-3 border-b-transparent"></div>
                         </div>
                       )}
@@ -199,12 +199,12 @@ export default function Features() {
                   return (
                     <div key={index} className="flex items-start gap-4">
                       {/* Flow Line & Arrow */}
-                      {!isLast && (
+                      {/* {!isLast && (
                         <div className="flex flex-col items-center pt-1">
                           <div className="w-0.5 h-10" style={{ background: 'linear-gradient(to bottom, #84cc16, #14b8a6)' }}></div>
                           <div className="w-0 h-0 border-t-5 border-t-lime-400 border-l-3 border-l-transparent border-r-3 border-r-transparent"></div>
                         </div>
-                      )}
+                      )} */}
                       
                       {/* Step Content */}
                       <div

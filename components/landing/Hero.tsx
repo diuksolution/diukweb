@@ -61,7 +61,7 @@ export default function Hero() {
 
           {/* Title */}
           <h1 
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in-up cursor-default"
+            className="text-3xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in-up cursor-default"
             style={{ animationDelay: '0.2s' }}
           >
             <span className="bg-clip-text text-transparent animate-gradient" style={{ background: 'linear-gradient(to right, #303d83, #14b8a6, #84cc16)', WebkitBackgroundClip: 'text', backgroundSize: '200% 200%' }}>
@@ -71,7 +71,7 @@ export default function Hero() {
 
           {/* Description */}
           <p 
-            className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto animate-fade-in-up hover:text-gray-700 transition-colors duration-300"
+            className="sm:text-xl text-sm text-gray-600 mb-12 max-w-3xl mx-auto animate-fade-in-up hover:text-gray-700 transition-colors duration-300"
             style={{ animationDelay: '0.4s' }}
           >
             {hero.description}
@@ -79,7 +79,7 @@ export default function Hero() {
 
           {/* CTA Buttons */}
           <div 
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-in-up"
+            className="flex flex-row gap-4 justify-center items-center mb-12 animate-fade-in-up"
             style={{ animationDelay: '0.6s' }}
           >
             {hero.ctaButtons.map((button, index) => {
@@ -91,7 +91,7 @@ export default function Hero() {
                 href={href}
                 {...(isWhatsApp ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 className={`
-                  relative px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 overflow-hidden group
+                  relative px-4 sm:px-8 py-2 sm:py-4 rounded-full font-semibold sm:text-lg text-[10px] transition-all duration-300 overflow-hidden group
                   ${
                     button.variant === 'primary'
                       ? 'text-gray-900 shadow-lg hover:shadow-xl'
@@ -119,7 +119,7 @@ export default function Hero() {
                                     <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 32 32"
-                  className="w-7 h-7 fill-current"
+                  className="w-4 h-4 sm:w-7 sm:h-7 fill-current"
                 >
                   <path d="M16 0C7.164 0 0 7.163 0 16c0 2.82.736 5.57 2.133 8.004L0 32l8.246-2.133A15.89 15.89 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.09c-2.43 0-4.81-.65-6.87-1.88l-.49-.29-4.89 1.27 1.3-4.77-.32-.5A13.07 13.07 0 012.91 16C2.91 8.77 8.77 2.91 16 2.91S29.09 8.77 29.09 16 23.23 29.09 16 29.09zm7.42-9.94c-.41-.2-2.44-1.2-2.82-1.34-.38-.14-.66-.2-.94.21-.27.4-1.08 1.34-1.32 1.62-.24.27-.48.31-.89.1-.41-.2-1.72-.63-3.27-2.02-1.21-1.08-2.03-2.42-2.27-2.83-.24-.41-.03-.63.18-.83.19-.19.41-.48.61-.72.2-.24.27-.41.41-.68.14-.27.07-.51-.03-.72-.1-.2-.94-2.27-1.29-3.1-.34-.82-.69-.71-.94-.72h-.8c-.27 0-.72.1-1.1.51-.38.41-1.44 1.41-1.44 3.45 0 2.03 1.48 3.99 1.69 4.27.2.27 2.9 4.44 7.04 6.22.98.42 1.74.68 2.34.86.99.31 1.89.27 2.6.16.79-.12 2.44-1 2.78-1.96.34-.96.34-1.79.24-1.96-.1-.17-.38-.27-.79-.48z" />
                 </svg>
@@ -133,7 +133,7 @@ export default function Hero() {
 
           {/* Trusted By */}
           <p 
-            className="text-sm text-gray-500 mb-8 animate-fade-in-up hover:text-gray-600 transition-colors duration-300"
+            className="sm:text-sm text-[12px] text-gray-500 mb-8 animate-fade-in-up hover:text-gray-600 transition-colors duration-300"
             style={{ animationDelay: '0.8s' }}
           >
             {hero.trustedBy}

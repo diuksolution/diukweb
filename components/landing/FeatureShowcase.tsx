@@ -88,7 +88,7 @@ export default function FeatureShowcase() {
                       key={item.key}
                       type="button"
                       onClick={() => setActiveKey(item.key)}
-                      className={`w-full text-left p-4 sm:p-5 transition-all duration-200 ${
+                      className={`w-full text-left px-3 py-2 sm:p-5 transition-all duration-200 ${
                         isActive ? 'bg-lime-50' : 'bg-white hover:bg-gray-50'
                       }`}
                     >
@@ -99,8 +99,8 @@ export default function FeatureShowcase() {
                           }`}
                         />
                         <div className="min-w-0">
-                          <p className="font-bold text-gray-900">{item.title}</p>
-                          <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                          <p className="sm:text-sm text-[12px] font-bold text-gray-900">{item.title}</p>
+                          <p className="sm:text-sm text-[10px] text-gray-600 line-clamp-2">{item.description}</p>
                         </div>
                       </div>
                     </button>
@@ -121,8 +121,8 @@ export default function FeatureShowcase() {
               <div className="p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900">{active.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{active.description}</p>
+                    <h3 className="sm:text-2xl text-[16px] font-bold text-gray-900">{active.title}</h3>
+                    <p className="sm:text-sm text-[10px] text-gray-600 mt-1">{active.description}</p>
                   </div>
                   <span
                     className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold"
@@ -139,9 +139,9 @@ export default function FeatureShowcase() {
                 </div>
 
                 {active.bullets && active.bullets.length > 0 && (
-                  <div className="mt-6 grid sm:grid-cols-2 gap-3">
+                  <div className="mt-6 grid sm:grid-cols-2 sm:gap-3 gap-1">
                     {active.bullets.map((b, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                      <div key={idx} className="flex items-start gap-2 sm:text-sm text-[10px] text-gray-700">
                         <span
                           className="mt-1 inline-block w-2 h-2 rounded-full"
                           style={{ background: 'linear-gradient(135deg, #303d83, #84cc16)' }}

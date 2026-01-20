@@ -16,9 +16,9 @@ function extractSetupFeeAmount(setupFee: string): string {
 
 function CheckItem({ children }: { children: string }) {
   return (
-    <div className="flex items-start gap-3 text-sm text-gray-800">
-      <span className="mt-0.5 inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white shrink-0">
-        <svg viewBox="0 0 20 20" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+    <div className="flex items-start sm:gap-3 gap-1 sm:text-sm text-[10px] text-gray-800">
+      <span className="mt-0.5 inline-flex items-center justify-center w-3 h-3 sm:w-6 sm:h-6 rounded-full bg-blue-600 text-white shrink-0">
+        <svg viewBox="0 0 20 20" className="w-2 h-2 sm:w-4 sm:h-4" fill="currentColor" aria-hidden="true">
           <path
             fillRule="evenodd"
             d="M16.704 5.29a1 1 0 010 1.414l-7.11 7.11a1 1 0 01-1.414 0L3.296 8.93A1 1 0 114.71 7.516l3.163 3.163 6.403-6.403a1 1 0 011.428.014z"
@@ -43,7 +43,7 @@ function PricingCard({ plan, delay }: { plan: any; delay: string }) {
       style={{ transitionDelay: delay }}
     >
       <div
-        className="rounded-3xl p-[2px] shadow-lg hover:shadow-xl transition-shadow duration-300 h-[520px] sm:h-[500px]"
+        className="rounded-3xl p-[2px] shadow-lg hover:shadow-xl transition-shadow duration-300 h-[340px] sm:h-[500px]"
         style={{ background: 'linear-gradient(135deg, #303d83, #14b8a6, #84cc16)' }}
       >
         <div className="relative rounded-3xl bg-white px-6 pt-7 pb-20 overflow-hidden h-full flex flex-col">
@@ -54,18 +54,18 @@ function PricingCard({ plan, delay }: { plan: any; delay: string }) {
           />
           <div className="flex flex-col h-full justify-center items-center">
             <div className="text-center">
-              <h3 className="text-2xl font-extrabold text-gray-900">{plan.name}</h3>
-              <div className="mt-2">
-                <span className="text-2xl sm:text-3xl font-extrabold" style={{ color: '#84cc16' }}>
+              <h3 className="sm:text-2xl text-[16px] font-extrabold text-gray-900">{plan.name}</h3>
+              <div className="sm:mt-2 mt-1">
+                <span className="sm:text-2xl text-[16px] font-extrabold" style={{ color: '#84cc16' }}>
                   {amount}
                 </span>
-                {per && <span className="text-lg font-semibold text-gray-500">/{per}</span>}
+                {per && <span className="sm:text-lg text-[12px] font-semibold text-gray-500">/{per}</span>}
               </div>
-              {plan.period && <p className="mt-1 text-sm text-gray-600">{plan.period}</p>}
+              {plan.period && <p className="mt-1 sm:text-sm text-[10px] text-gray-600">{plan.period}</p>}
             </div>
 
-            <div className="mt-6 flex-1 overflow-hidden">
-              <div className="h-full overflow-auto pr-1 space-y-3">
+            <div className="sm:mt-6 mt-3 flex-1 overflow-hidden">
+              <div className="h-full overflow-auto pr-1 sm:space-y-3 space-y-1">
                 {(plan.features || []).map((feat: string, idx: number) => (
                   <CheckItem key={idx}>{feat}</CheckItem>
                 ))}
@@ -79,8 +79,8 @@ function PricingCard({ plan, delay }: { plan: any; delay: string }) {
                   className="rounded-2xl bg-white border-2 px-4 py-3 text-center shadow-lg"
                   style={{ borderColor: '#84cc16' }}
                 >
-                  <p className="text-sm font-semibold text-gray-700">Setup fee</p>
-                  <p className="text-xl font-extrabold text-gray-900">{setupFeeAmount}</p>
+                  <p className="sm:text-sm text-[10px] font-semibold text-gray-700">Setup fee</p>
+                  <p className="sm:text-xl text-[12px] font-extrabold text-gray-900">{setupFeeAmount}</p>
                 </div>
               </div>
             )}
