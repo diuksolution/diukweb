@@ -322,20 +322,20 @@
   },
   "pricing": {
     "title": "HARGA LAYANAN KAMI",
-    "subtitle": "Paket AI Agent, Website, dan Combo untuk bisnis Anda",
-    "description": "Pilih paket sesuai kebutuhan AI Agent, Website Profile, atau gabungan keduanya untuk efisiensi maksimal.",
+    "subtitle": "Paket AI Agent dan Website untuk bisnis Anda",
+    "description": "Pilih paket sesuai kebutuhan AI Agent dan Website untuk efisiensi maksimal.",
     "packages": [
       {
         "category": "AI Agent",
         "name": "Diuk Plus",
-        "price": "IDR 1.200.000,00 / month",
+        "price": "IDR 1.000.000,00 / month",
         "period": "AI Agent WhatsApp",
         "features": [
-          "3.500–4.000 active user",
           "24 jam AI kerja",
           "AI responses 25k / month",
-          "Workflow",
-          "Dashboard CS",
+          "CRM Integration",
+          "Dashboard Customer Service",
+          "Smart Broadcast",
           "Customize"
         ],
         "setupFee": "Setup fee AI agent IDR 4.000.000,00"
@@ -343,52 +343,58 @@
       {
         "category": "AI Agent",
         "name": "Diuk Plus Pro",
-        "price": "IDR 1.500.000,00 / month",
+        "price": "IDR 1.300.000,00 / month",
         "period": "AI Agent WhatsApp + Instagram",
         "features": [
-          "7.000 active user",
           "24 jam AI kerja",
           "AI responses 50k / month",
-          "Workflow",
-          "Dashboard CS",
+          "CRM Integration",
+          "Dashboard Customer Service",
+          "Smart Broadcast",
           "Customize"
         ],
         "setupFee": "Setup fee AI agent IDR 4.200.000,00",
-        "tag": "Most Popular"
+        "tag": ""
+      }
+    ],
+    "website": [
+      {
+        "category": "Website",
+        "name": "Diuk Web Buy on Table",
+        "price": "IDR 500.000,00 / month",
+        "period": "Buy on Table",
+        "features": [
+          "QR Code Menu on Table",
+          "Dashboard Order Management"
+        ],
+        "setupFee": "Setup fee website IDR 1.500.000,00"
       },
       {
         "category": "Website",
         "name": "Diuk Web",
         "price": "IDR 1.200.000,00 / year",
-        "period": "Website profile + domain",
+        "period": "Website profile",
         "features": [
           "Website profile",
           "Domain URL",
           "Free customize design"
         ],
-        "setupFee": "Setup fee website IDR 4.500.000,00"
+        "setupFee": "Setup fee website IDR 3.500.000,00"
+      },
+      {
+        "category": "Website",
+        "name": "Diuk Web Full Customize",
+        "price": "IDR 1.200.000,00 / year",
+        "period": "Website profile",
+        "features": [
+          "Website profile",
+          "Domain URL",
+          "Free customize design",
+          "Reservasi Web Otomatis"
+        ],
+        "setupFee": "Setup fee website IDR 3.500.000,00"
       }
-    ],
-    "combos": {
-      "title": "Paket Combo Website + AI Agent",
-      "subtitle": "Hemat biaya dengan kombinasi Website + AI Agent",
-      "items": [
-        {
-          "name": "Diuk Web + Diuk Plus",
-          "agentPrice": "AI agent: IDR 1.000.000,00 / month",
-          "webPrice": "Website: IDR 1.000.000,00 / year",
-          "setupFee": "Setup fee AI agent + website IDR 7.000.000,00",
-          "savings": "Hemat hingga 1.9 juta"
-        },
-        {
-          "name": "Diuk Web + Diuk Plus Pro",
-          "agentPrice": "AI agent: IDR 1.250.000,00 / month",
-          "webPrice": "Website: IDR 1.000.000,00 / year",
-          "setupFee": "Setup fee AI agent + website IDR 7.100.000,00",
-          "savings": "Hemat hingga 2 juta"
-        }
-      ]
-    }
+    ]
   },
   "advancedFeatures": [
     {
@@ -500,13 +506,13 @@
     "items": [
       {
         "text": "DIUK helps us serve customers better. Fast, accurate replies keep people happy - revenue grew 30% after adopting it.",
-        "author": "",
-        "role": ""
+        "author": "Sultan Aziz P",
+        "role": "Owner Putri Melati Stationary"
       },
       {
         "text": "We can now handle orders 24/7 thanks to DIUK. No more missed requests and our CS is far more efficient.",
-        "author": "",
-        "role": ""
+        "author": "Fadli Aliefinov",
+        "role": "Manager Kasiko Coffee"
       },
       {
         "text": "Patient registration and online consults are much easier. The 24/7 response really helps - highly recommended for clinics.",

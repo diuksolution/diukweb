@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Reservation {
@@ -19,6 +19,37 @@ export default function ReservasiPage() {
   const [error, setError] = useState<string | null>(null)
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
+  const [page, setPage] = useState<number>(1)
+
+  const ROWS_PER_PAGE = 20
+
+  const getColWidth = (header: string) => {
+    const h = (header || '').toLowerCase()
+    if (h.includes('tanggal') || h.includes('date') || h.includes('tgl')) return 100
+    if (h.includes('nama') || h.includes('name')) return 100
+    if (h.includes('alamat') || h.includes('address')) return 50
+    if (h.includes('telepon') || h.includes('phone') || h.includes('hp') || h.includes('wa')) return 50
+    if (h.includes('email')) return 50
+    if (h.includes('catatan') || h.includes('notes') || h.includes('keterangan')) return 105
+    if (h.includes('menu yang dipesan') || h.includes('quantity')) return 250
+    if (h.includes('jumlah orang') || h.includes('people')) return 10
+    return 70
+  }
+
+  const shouldWrapCell = (header: string) => {
+    const h = (header || '').toLowerCase()
+    return (
+      h.includes('menu yang dipesan') ||
+      h.includes('nama') ||
+      h.includes('tempat') ||
+      h.includes('menu') ||
+      h.includes('catatan') ||
+      h.includes('notes') ||
+      h.includes('keterangan') ||
+      h.includes('alamat') ||
+      h.includes('address')
+    )
+  }
 
   useEffect(() => {
     fetchReservations()
@@ -121,6 +152,33 @@ export default function ReservasiPage() {
       })
     : reservations
 
+  // Reset page on filter change
+  useEffect(() => {
+    setPage(1)
+  }, [startDate, endDate])
+
+  const totalPages = Math.max(1, Math.ceil(filteredReservations.length / ROWS_PER_PAGE))
+
+  // Clamp page if data changes (e.g., filter reduces result count)
+  useEffect(() => {
+    setPage((p) => Math.min(Math.max(1, p), totalPages))
+  }, [totalPages])
+
+  const paginatedReservations = useMemo(() => {
+    const start = (page - 1) * ROWS_PER_PAGE
+    return filteredReservations.slice(start, start + ROWS_PER_PAGE)
+  }, [filteredReservations, page])
+
+  const paginationPages = useMemo(() => {
+    const maxButtons = 5
+    const pages: number[] = []
+    const half = Math.floor(maxButtons / 2)
+    let start = Math.max(1, page - half)
+    let end = Math.min(totalPages, start + maxButtons - 1)
+    start = Math.max(1, end - maxButtons + 1)
+    for (let p = start; p <= end; p++) pages.push(p)
+    return pages
+  }, [page, totalPages])
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-'
@@ -143,13 +201,13 @@ export default function ReservasiPage() {
         {/* Header with gradient */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[#303d83] via-[#14b8a6] to-[#84cc16]">
+            <div className="p-2 rounded-xl bg-linear-to-br from-[#303d83] via-[#14b8a6] to-[#84cc16]">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-[#303d83] via-[#14b8a6] to-[#84cc16] bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-linear-to-r from-[#303d83] via-[#14b8a6] to-[#84cc16] bg-clip-text text-transparent">
                 Reservasi Management
               </h1>
               <p className="mt-1 text-lg text-gray-600">
@@ -161,7 +219,7 @@ export default function ReservasiPage() {
 
         {error && (
           <div className="mb-6 rounded-xl bg-red-50 border-2 border-red-200 p-4 flex items-start gap-3 animate-shake">
-            <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="flex-1">
@@ -176,7 +234,7 @@ export default function ReservasiPage() {
             {/* Header with Filter */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between w-full min-w-0">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-[#303d83]/10 to-[#14b8a6]/10">
+                <div className="p-2 rounded-lg bg-linear-to-br from-[#303d83]/10 to-[#14b8a6]/10">
                   <svg className="w-5 h-5 text-[#303d83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -189,7 +247,7 @@ export default function ReservasiPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[#303d83]/10 via-[#14b8a6]/10 to-[#84cc16]/10 border border-[#303d83]/20">
+                <div className="px-3 py-1.5 rounded-full bg-linear-to-r from-[#303d83]/10 via-[#14b8a6]/10 to-[#84cc16]/10 border border-[#303d83]/20">
                   <span className="text-xs font-semibold text-[#303d83]">
                     {filteredReservations.length} dari {reservations.length} Reservasi
                   </span>
@@ -288,24 +346,37 @@ export default function ReservasiPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-gray-200 overflow-x-auto w-full" style={{ maxWidth: '100%' }}>
-              <table className="divide-y divide-gray-200 table-auto" style={{ minWidth: 'max-content', width: 'auto' }}>
-                <thead className="bg-gradient-to-r from-gray-50 to-white">
+              <table className="divide-y divide-gray-200 table-fixed" style={{ minWidth: 'max-content', width: 'max-content' }}>
+                <colgroup>
+                  <col style={{ width: 56 }} />
+                  {headers.map((header, idx) => (
+                    <col key={idx} style={{ width: getColWidth(header) }} />
+                  ))}
+                </colgroup>
+                <thead className="bg-linear-to-r from-gray-50 to-white">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-[0.1em]">
+                    <th className="p-3 text-center text-[12px] font-semibold text-gray-700 uppercase">
                       No
                     </th>
                     {headers.map((header, idx) => (
-                      <th key={idx} className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-[0.1em]">
-                        {header}
+                      <th key={idx} className="p-3 text-center text-[12px] font-semibold text-gray-700 uppercase">
+                        <div
+                          className={`w-full ${shouldWrapCell(header) ? 'whitespace-normal wrap-break-word' : 'truncate'}`}
+                          title={header}
+                        >
+                          {header}
+                        </div>
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredReservations.map((reservation, idx) => (
-                    <tr key={reservation.index} className="hover:bg-gradient-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 transition-all duration-200">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-gray-500">{idx + 1}</span>
+                  {paginatedReservations.map((reservation, idx) => (
+                    <tr key={reservation.index} className="hover:bg-linear-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 transition-all duration-200">
+                      <td className="p-3 text-center">
+                        <span className="text-[12px] font-semibold text-gray-500">
+                          {(page - 1) * ROWS_PER_PAGE + idx + 1}
+                        </span>
                       </td>
                       {headers.map((header, headerIdx) => {
                         const value = reservation[header] || ''
@@ -316,13 +387,25 @@ export default function ReservasiPage() {
                           header.toLowerCase().includes('tgl')
                         
                         return (
-                          <td key={headerIdx} className="px-6 py-4 whitespace-nowrap">
+                          <td
+                            key={headerIdx}
+                            className={`p-3 align-top ${shouldWrapCell(header) ? 'text-left' : 'text-center'}`}
+                          >
                             {isDateColumn && reservation._reservationDate ? (
-                              <span className="text-sm font-semibold text-gray-900">
+                              <div className="w-full truncate text-[12px] font-semibold text-gray-900" title={formatDate(reservation._reservationDate)}>
                                 {formatDate(reservation._reservationDate)}
-                              </span>
+                              </div>
                             ) : (
-                              <span className="text-sm text-gray-700">{value || <span className="text-gray-400">-</span>}</span>
+                              <div
+                                className={`w-full text-[12px] text-gray-700 ${
+                                  shouldWrapCell(header)
+                                    ? 'whitespace-normal wrap-break-word leading-snug'
+                                    : 'truncate'
+                                }`}
+                                title={value || ''}
+                              >
+                                {value || <span className="text-gray-400">-</span>}
+                              </div>
                             )}
                           </td>
                         )
@@ -331,6 +414,59 @@ export default function ReservasiPage() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Pagination */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-gray-200 px-3 py-3 bg-white">
+                <div className="text-xs text-gray-600">
+                  Menampilkan{' '}
+                  <span className="font-semibold text-gray-900">
+                    {filteredReservations.length === 0 ? 0 : (page - 1) * ROWS_PER_PAGE + 1}
+                  </span>
+                  {' '}–{' '}
+                  <span className="font-semibold text-gray-900">
+                    {Math.min(page * ROWS_PER_PAGE, filteredReservations.length)}
+                  </span>
+                  {' '}dari{' '}
+                  <span className="font-semibold text-gray-900">{filteredReservations.length}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Prev
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {paginationPages.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`min-w-8 px-2 py-1.5 rounded-lg text-xs font-semibold border ${
+                          p === page
+                            ? 'border-[#303d83] bg-[#303d83]/10 text-[#303d83]'
+                            : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

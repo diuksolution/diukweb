@@ -153,10 +153,6 @@ export default function FeatureShowcase() {
                 )}
               </div>
             </div>
-
-            <p className="text-xs text-gray-500 mt-3">
-              *Screenshot di atas masih contoh (sementara pakai asset yang ada). Nanti bisa diganti dengan screenshot asli DIUK.
-            </p>
           </div>
         </div>
       </div>
