@@ -31,6 +31,7 @@ export default function BusinessPage() {
   const [menuSheetId, setMenuSheetId] = useState<string>('') // untuk data menu / customer
   const [reservationSheetId, setReservationSheetId] = useState<string>('') // untuk data reservasi
   const [tempatSheetId, setTempatSheetId] = useState<string>('') // untuk data tempat
+  const [faqSheetId, setFaqSheetId] = useState<string>('') // untuk data FAQ
   const [sheetsLoading, setSheetsLoading] = useState(false)
   const [sheetsError, setSheetsError] = useState<string | null>(null)
 
@@ -66,9 +67,11 @@ export default function BusinessPage() {
         const gidMatch = data.linkdata.match(/[#&]gid=(\d+)/)
         const reservGidMatch = data.linkdata.match(/[#&]reservasiGid=(\d+)/)
         const tempatGidMatch = data.linkdata.match(/[#&]tempatGid=(\d+)/)
+        const faqGidMatch = data.linkdata.match(/[#&]faqGid=(\d+)/)
         if (gidMatch) setMenuSheetId(gidMatch[1])
         if (reservGidMatch) setReservationSheetId(reservGidMatch[1])
         if (tempatGidMatch) setTempatSheetId(tempatGidMatch[1])
+        if (faqGidMatch) setFaqSheetId(faqGidMatch[1])
       }
     } catch (error) {
       console.error('Error fetching business:', error)
@@ -83,13 +86,20 @@ export default function BusinessPage() {
     return match ? match[1] : null
   }
 
-  const buildSheetUrl = (baseUrl: string, menuId: string, reservId: string, tempatId: string): string => {
+  const buildSheetUrl = (
+    baseUrl: string,
+    menuId: string,
+    reservId: string,
+    tempatId: string,
+    faqId: string
+  ): string => {
     const spreadsheetId = extractSpreadsheetId(baseUrl)
     if (!spreadsheetId) return baseUrl
     const params: string[] = []
     if (menuId) params.push(`gid=${menuId}`)
     if (reservId) params.push(`reservasiGid=${reservId}`)
     if (tempatId) params.push(`tempatGid=${tempatId}`)
+    if (faqId) params.push(`faqGid=${faqId}`)
     const hash = params.join('&')
     return hash
       ? `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#${hash}`
@@ -131,6 +141,10 @@ export default function BusinessPage() {
           const third = data.sheets[2]?.id ?? data.sheets[0].id
           setTempatSheetId(third)
         }
+        if (!faqSheetId) {
+          const fourth = data.sheets[3]?.id ?? data.sheets[0].id
+          setFaqSheetId(fourth)
+        }
       }
     } catch (err: any) {
       console.error('Error loading sheets:', err)
@@ -150,8 +164,14 @@ export default function BusinessPage() {
     try {
       // If user selected specific sheets, normalize linkdata to URL yang menyimpan semua sheet IDs
       let linkdataToSave = formData.linkdata
-      if (formData.linkdata && (menuSheetId || reservationSheetId || tempatSheetId)) {
-        linkdataToSave = buildSheetUrl(formData.linkdata, menuSheetId, reservationSheetId, tempatSheetId)
+      if (formData.linkdata && (menuSheetId || reservationSheetId || tempatSheetId || faqSheetId)) {
+        linkdataToSave = buildSheetUrl(
+          formData.linkdata,
+          menuSheetId,
+          reservationSheetId,
+          tempatSheetId,
+          faqSheetId
+        )
       }
 
       const payload = { ...formData, linkdata: linkdataToSave }
@@ -293,6 +313,7 @@ export default function BusinessPage() {
                       setMenuSheetId('')
                       setReservationSheetId('')
                       setTempatSheetId('')
+                      setFaqSheetId('')
                       setSheetsError(null)
                     }}
                     onBlur={() => {
@@ -341,7 +362,7 @@ export default function BusinessPage() {
                       </svg>
                       <p className="text-sm font-semibold text-gray-900">Pilih Sheet Configuration</p>
                     </div>
-                    <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-2">
                           Sheet Menu
@@ -399,6 +420,26 @@ export default function BusinessPage() {
                         </select>
                         <p className="mt-1 text-xs text-gray-500">
                           Data tempat
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Sheet FAQ
+                        </label>
+                        <select
+                          value={faqSheetId}
+                          onChange={(e) => setFaqSheetId(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-[#303d83] transition-all text-sm hover:border-gray-300"
+                        >
+                          {sheets.map((sheet) => (
+                            <option key={sheet.id} value={sheet.id}>
+                              {sheet.title || `Sheet ${sheet.id}`}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="mt-1 text-xs text-gray-500">
+                          Data FAQ
                         </p>
                       </div>
                     </div>

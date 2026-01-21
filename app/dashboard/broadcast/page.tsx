@@ -16,6 +16,11 @@ interface Broadcast {
   tanggal: string
   status: string
   createdAt: string
+  recipients?: {
+    nama?: string
+    noWa?: string
+    idWa?: string
+  }[] | null
 }
 
 export default function BroadcastPage() {
@@ -23,6 +28,7 @@ export default function BroadcastPage() {
   const [loading, setLoading] = useState(true)
   const [customers, setCustomers] = useState<Customer[]>([])
   const [broadcasts, setBroadcasts] = useState<Broadcast[]>([])
+  const [selectedBroadcast, setSelectedBroadcast] = useState<Broadcast | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
   const [formData, setFormData] = useState({
@@ -31,6 +37,7 @@ export default function BroadcastPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCustomers()
@@ -114,6 +121,36 @@ export default function BroadcastPage() {
       setBroadcasts(data.broadcasts || [])
     } catch (error) {
       console.error('Error fetching broadcasts:', error)
+    }
+  }
+
+  const handleDeleteBroadcast = async (broadcastId: string) => {
+    const ok = window.confirm('Hapus history broadcast ini? Aksi ini tidak bisa dibatalkan.')
+    if (!ok) return
+
+    try {
+      setDeletingId(broadcastId)
+      setError(null)
+      setSuccess(null)
+
+      const resp = await fetch(`/api/broadcast/${broadcastId}`, { method: 'DELETE' })
+      const data = await resp.json().catch(() => ({}))
+
+      if (!resp.ok) {
+        throw new Error(data?.error || 'Gagal menghapus broadcast')
+      }
+
+      setBroadcasts((prev) => prev.filter((b) => b.id !== broadcastId))
+      if (selectedBroadcast?.id === broadcastId) {
+        setSelectedBroadcast(null)
+      }
+      setSuccess('Broadcast berhasil dihapus')
+      setTimeout(() => setSuccess(null), 4000)
+    } catch (err: any) {
+      console.error('Error deleting broadcast:', err)
+      setError(err.message || 'Gagal menghapus broadcast')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -459,7 +496,13 @@ export default function BroadcastPage() {
               {broadcasts.map((broadcast) => (
                 <div
                   key={broadcast.id}
-                  className="rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 hover:border-[#303d83]/30 hover:shadow-lg transition-all duration-200"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedBroadcast(broadcast)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedBroadcast(broadcast)
+                  }}
+                  className="rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 hover:border-[#303d83]/30 hover:shadow-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#303d83]/50"
                 >
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
@@ -498,8 +541,30 @@ export default function BroadcastPage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 flex flex-col items-end gap-2">
                       {getStatusBadge(broadcast.status)}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteBroadcast(broadcast.id)
+                        }}
+                        disabled={deletingId === broadcast.id}
+                        className="p-2 rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                        title="Hapus broadcast"
+                        aria-label="Hapus broadcast"
+                      >
+                        {deletingId === broadcast.id ? (
+                          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -508,6 +573,89 @@ export default function BroadcastPage() {
           )}
         </div>
       </div>
+
+      {/* Recipients Modal */}
+      {selectedBroadcast && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setSelectedBroadcast(null)}
+        >
+          <div
+            className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-gray-200 flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#303d83] mb-1">
+                  Broadcast Recipients
+                </p>
+                <h3 className="text-lg font-bold text-gray-900 truncate">
+                  {selectedBroadcast.pesan}
+                </h3>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                  <span>
+                    {new Date(selectedBroadcast.createdAt).toLocaleDateString('id-ID', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span>
+                    {(selectedBroadcast.recipients?.length ?? 0)} penerima
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedBroadcast(null)}
+                className="px-3 py-2 rounded-xl text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Tutup
+              </button>
+            </div>
+
+            <div className="p-5">
+              {selectedBroadcast.recipients && selectedBroadcast.recipients.length > 0 ? (
+                <div className="max-h-[60vh] overflow-y-auto rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50">
+                  <div className="grid grid-cols-12 gap-3 px-4 py-3 border-b border-gray-200 text-xs font-semibold text-gray-600">
+                    <div className="col-span-5">Nama</div>
+                    <div className="col-span-4">ID WA</div>
+                    <div className="col-span-3">No WA</div>
+                  </div>
+                  <div className="divide-y divide-gray-200">
+                    {selectedBroadcast.recipients.map((r, idx) => (
+                      <div key={idx} className="grid grid-cols-12 gap-3 px-4 py-3 text-sm">
+                        <div className="col-span-5 font-semibold text-gray-900">
+                          {r?.nama || <span className="text-gray-400">-</span>}
+                        </div>
+                        <div className="col-span-4 font-mono text-gray-700">
+                          {r?.idWa || <span className="text-gray-400">-</span>}
+                        </div>
+                        <div className="col-span-3 font-mono text-gray-700">
+                          {r?.noWa || <span className="text-gray-400">-</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6">
+                  <p className="text-sm text-gray-600 font-semibold">Belum ada data penerima untuk broadcast ini.</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Catatan: broadcast lama (sebelum update ini) memang belum menyimpan daftar penerima.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

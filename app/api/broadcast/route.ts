@@ -65,6 +65,13 @@ export async function POST(request: Request) {
       )
     }
 
+    // Normalize recipients to store in DB for history popup
+    const recipients = (selectedCustomers as any[]).map((customer: any) => ({
+      nama: customer?.nama ?? '',
+      noWa: customer?.noWa ?? '',
+      idWa: customer?.idWa ?? '',
+    }))
+
     // Create broadcast record
     let broadcast = await prisma.broadcast.create({
       data: {
@@ -72,6 +79,7 @@ export async function POST(request: Request) {
         tanggal: tanggal ? new Date(tanggal) : new Date(),
         userId: dbUser.id,
         status: 'pending',
+        recipients,
       },
     })
 

@@ -30,23 +30,33 @@ export async function GET() {
   }
 }
 
-// Utility: parse sheet IDs (menu, reservasi, tempat) dari linkdata jika ada
-const parseSheetIdsFromLink = (link?: string | null): { menuSheetId: string | null; reservationSheetId: string | null; tempatSheetId: string | null } => {
-  if (!link) return { menuSheetId: null, reservationSheetId: null, tempatSheetId: null }
+// Utility: parse sheet IDs (menu, reservasi, tempat, faq) dari linkdata jika ada
+const parseSheetIdsFromLink = (
+  link?: string | null
+): {
+  menuSheetId: string | null
+  reservationSheetId: string | null
+  tempatSheetId: string | null
+  faqSheetId: string | null
+} => {
+  if (!link) return { menuSheetId: null, reservationSheetId: null, tempatSheetId: null, faqSheetId: null }
 
   let menuSheetId: string | null = null
   let reservationSheetId: string | null = null
   let tempatSheetId: string | null = null
+  let faqSheetId: string | null = null
 
   const gidMatch = link.match(/[#&]gid=(\d+)/)
   const reservMatch = link.match(/[#&]reservasiGid=(\d+)/)
   const tempatMatch = link.match(/[#&]tempatGid=(\d+)/)
+  const faqMatch = link.match(/[#&]faqGid=(\d+)/)
 
   if (gidMatch) menuSheetId = gidMatch[1]
   if (reservMatch) reservationSheetId = reservMatch[1]
   if (tempatMatch) tempatSheetId = tempatMatch[1]
+  if (faqMatch) faqSheetId = faqMatch[1]
 
-  return { menuSheetId, reservationSheetId, tempatSheetId }
+  return { menuSheetId, reservationSheetId, tempatSheetId, faqSheetId }
 }
 
 // PUT - Update business data
@@ -114,7 +124,9 @@ export async function PUT(request: Request) {
           headers['diuksolution'] = process.env.N8N_WEBHOOK_AUTH_INIT
         }
 
-        const { menuSheetId, reservationSheetId, tempatSheetId } = parseSheetIdsFromLink(updatedBusiness.linkdata)
+        const { menuSheetId, reservationSheetId, tempatSheetId, faqSheetId } = parseSheetIdsFromLink(
+          updatedBusiness.linkdata
+        )
 
         const payload = {
           business: {
@@ -126,6 +138,7 @@ export async function PUT(request: Request) {
             menuSheetId,
             reservationSheetId,
             tempatSheetId,
+            faqSheetId,
           },
           user: {
             id: dbUser.id,
