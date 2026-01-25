@@ -10,7 +10,9 @@ type ShowcaseItem = {
   title: string
   description: string
   bullets?: string[]
-  image: string
+  image?: string
+  video?: string
+  poster?: string
 }
 
 export default function FeatureShowcase() {
@@ -19,6 +21,7 @@ export default function FeatureShowcase() {
 
   const { ref: sectionRef, isVisible: sectionVisible } = useScrollAnimation({ triggerOnce: true })
   const [activeKey, setActiveKey] = useState<string>(items[0]?.key ?? '')
+  const [videoErrorKey, setVideoErrorKey] = useState<string | null>(null)
 
   const active = useMemo(
     () => items.find((i) => i.key === activeKey) ?? items[0],
@@ -132,9 +135,36 @@ export default function FeatureShowcase() {
                   </span>
                 </div>
 
-                <div className="relative rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden">
-                  <div className="relative w-full aspect-[16/9]">
-                    <Image src={active.image} alt={`${active.title} screenshot`} fill className="object-contain p-6" />
+                <div
+                  className={`relative rounded-2xl border border-gray-200 overflow-hidden ${
+                    active.video && videoErrorKey !== active.key ? 'bg-transparent' : 'bg-gray-50'
+                  }`}
+                >
+                  <div className="relative w-full aspect-video">
+                    {active.video && videoErrorKey !== active.key ? (
+                      <video
+                        key={active.key}
+                        src={active.video}
+                        poster={active.poster ?? active.image}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="metadata"
+                        disablePictureInPicture
+                        controls={false}
+                        controlsList="nodownload noplaybackrate noremoteplayback"
+                        className="absolute inset-0 w-full h-full object-contain p-6 bg-transparent"
+                        style={{ backgroundColor: 'transparent' }}
+                        onError={() => setVideoErrorKey(active.key)}
+                      />
+                    ) : active.image ? (
+                      <Image src={active.image} alt={`${active.title} screenshot`} fill className="object-contain p-6" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-500">
+                        Preview tidak tersedia
+                      </div>
+                    )}
                   </div>
                 </div>
 
