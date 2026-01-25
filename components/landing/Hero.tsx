@@ -5,10 +5,10 @@ import landingData from '@/data/landing-page.json'
 import { useState, useEffect } from 'react'
 
 export default function Hero() {
-  const { hero, header } = landingData
+  const { hero, footer } = landingData
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   
-  const whatsappNumber = header?.whatsapp?.number || '6281234567890'
+  const whatsappNumber = footer.links.contact?.whatsapp || '6281234567890'
   const whatsappUrl = `https://wa.me/${whatsappNumber}`
 
   useEffect(() => {
