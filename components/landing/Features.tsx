@@ -14,7 +14,7 @@ export default function Features() {
   if (!features) return null
 
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(to bottom, rgba(48,61,131,0.05), white, rgba(132,204,22,0.05))' }}>
+    <section id="feature&Services" className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(to bottom, rgba(48,61,131,0.05), white, rgba(132,204,22,0.05))' }}>
       {/* Background Effects */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(48,61,131,0.03), white, rgba(132,204,22,0.03))' }}>
         <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 20%, rgba(48,61,131,0.08), transparent 60%)' }}></div>

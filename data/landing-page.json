@@ -299,13 +299,14 @@
       {
         "key": "smart-broadcast",
         "title": "Smart Broadcast",
-        "description": "Kirim campaign/broadcast dengan lebih aman dan terarah. Segmentasi customer bikin pesan lebih relevan dan efektif.",
+        "description": "Kirim campaign/broadcast dengan lebih aman dan terarah. Segmentasi customer bikin pesan lebih relevan, lengkap dengan teks dan gambar agar tampil lebih menarik.",
         "bullets": [
           "Segmentasi customer sesuai kebutuhan",
+          "Kirim pesan + gambar (produk, poster, dll)",
           "Template pesan yang konsisten",
           "Bantu re-activate leads lama"
         ],
-        "image": "/fitur/BCweb.png"
+        "image": "/fitur/BCwebsite.png"
       },
       {
         "key": "ai-customer-agent",

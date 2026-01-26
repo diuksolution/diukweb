@@ -31,7 +31,7 @@ export default function FeatureShowcase() {
   if (!featureShowcase || items.length === 0 || !active) return null
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-white">
+    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-white">
       {/* Background accents (match other sections vibe) */}
       <div
         className="absolute inset-0"
