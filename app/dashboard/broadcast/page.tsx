@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Customer {
@@ -34,6 +34,9 @@ export default function BroadcastPage() {
   const [formData, setFormData] = useState({
     pesan: '',
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -43,6 +46,18 @@ export default function BroadcastPage() {
     fetchCustomers()
     fetchBroadcasts()
   }, [])
+
+  useEffect(() => {
+    if (!imageFile) {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+      setImagePreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(imageFile)
+    setImagePreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageFile])
 
   // Merge customers by ID WA, keep the latest name if names differ
   const mergeCustomersByIdWa = (rawCustomers: Customer[]): Customer[] => {
@@ -185,15 +200,17 @@ export default function BroadcastPage() {
 
       const selectedCustomerData = selectedCustomers.map(idx => customers[parseInt(idx)])
 
+      // Send as multipart/form-data so we can include an optional image file
+      const fd = new FormData()
+      fd.append('pesan', formData.pesan)
+      fd.append('selectedCustomers', JSON.stringify(selectedCustomerData))
+      if (imageFile) {
+        fd.append('image', imageFile, imageFile.name)
+      }
+
       const response = await fetch('/api/broadcast', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pesan: formData.pesan,
-          selectedCustomers: selectedCustomerData,
-        }),
+        body: fd,
       })
 
       if (!response.ok) {
@@ -207,6 +224,8 @@ export default function BroadcastPage() {
       setFormData({ 
         pesan: '',
       })
+      setImageFile(null)
+      if (imageInputRef.current) imageInputRef.current.value = ''
       setSelectedCustomers([])
       fetchBroadcasts()
       setTimeout(() => setSuccess(null), 5000)
@@ -336,6 +355,59 @@ export default function BroadcastPage() {
               </div>
 
               <div>
+                <label htmlFor="image" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <svg className="w-4 h-4 text-[#303d83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Gambar (opsional)
+                </label>
+                <div className="flex flex-col gap-3">
+                  <input
+                    ref={imageInputRef}
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null
+                      setImageFile(file)
+                    }}
+                    className="block w-full text-sm text-gray-700 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#303d83]/10 file:text-[#303d83] hover:file:bg-[#303d83]/20 transition-all"
+                  />
+
+                  {imageFile && imagePreviewUrl ? (
+                    <div className="flex items-start gap-4">
+                      <div className="relative w-28 h-28 rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imagePreviewUrl}
+                          alt="Preview gambar"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageFile(null)
+                            if (imageInputRef.current) imageInputRef.current.value = ''
+                          }}
+                          className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
+                          aria-label="Hapus gambar"
+                          title="Hapus gambar"
+                        >
+                          <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="flex-1">
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500"></p>
+                  )}
+                </div>
+              </div>
+
+              <div>
                 <div className="flex justify-between items-center mb-4">
                   <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                     <svg className="w-4 h-4 text-[#303d83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,6 +484,8 @@ export default function BroadcastPage() {
                     setFormData({ 
                       pesan: '',
                     })
+                    setImageFile(null)
+                    if (imageInputRef.current) imageInputRef.current.value = ''
                     setSelectedCustomers([])
                   }}
                   className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center gap-2"
