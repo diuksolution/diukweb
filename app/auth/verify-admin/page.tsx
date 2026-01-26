@@ -14,13 +14,7 @@ function VerifyAdminContent() {
 
   useEffect(() => {
     // Ambil token dari query parameter
-    const token = searchParams.get('token')
-
-    if (!token) {
-      setStatus('error')
-      setMessage('Invalid verification token')
-      return
-    }
+    const tokenFromQuery = searchParams.get('token')
 
     // Handle access_token dari hash fragment (dari Supabase invite)
     const handleHash = () => {
@@ -37,11 +31,57 @@ function VerifyAdminContent() {
           refresh_token: refreshToken,
         }).then(() => {
           // Setelah session di-set, verifikasi admin
-          verifyAdmin(token)
+          resolveTokenAndVerify(tokenFromQuery)
         })
       } else {
-        // Jika tidak ada access_token, langsung verifikasi
+        // Jika tidak ada access_token, langsung verifikasi (pakai token query)
+        resolveTokenAndVerify(tokenFromQuery)
+      }
+    }
+
+    const resolveTokenAndVerify = async (token?: string | null) => {
+      // Prefer query param token
+      if (token) {
         verifyAdmin(token)
+        return
+      }
+
+      // If no token in query, try to read from Supabase user_metadata (invite flow)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        const meta: any = user?.user_metadata || {}
+        const tokenFromMeta: string | undefined =
+          meta.verification_token ||
+          meta.verificationToken
+
+        if (tokenFromMeta) {
+          verifyAdmin(tokenFromMeta)
+          return
+        }
+
+        // Fallback: parse token from verification_url if present
+        const verificationUrl: string | undefined = meta.verification_url || meta.verificationUrl
+        if (verificationUrl) {
+          try {
+            const url = new URL(verificationUrl)
+            const tokenFromUrl = url.searchParams.get('token')
+            if (tokenFromUrl) {
+              verifyAdmin(tokenFromUrl)
+              return
+            }
+          } catch {
+            // ignore
+          }
+        }
+
+        setStatus('error')
+        setMessage('Invalid verification token')
+      } catch (e) {
+        console.error('Failed to resolve verification token:', e)
+        setStatus('error')
+        setMessage('Invalid verification token')
       }
     }
 
@@ -49,8 +89,8 @@ function VerifyAdminContent() {
     if (window.location.hash) {
       handleHash()
     } else {
-      // Jika tidak ada hash, langsung verifikasi
-      verifyAdmin(token)
+      // Jika tidak ada hash, langsung verifikasi (pakai token query)
+      resolveTokenAndVerify(tokenFromQuery)
     }
   }, [searchParams])
 
