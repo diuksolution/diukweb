@@ -118,9 +118,12 @@ export async function POST(request: Request) {
       supabaseUserId = newUser.user.id
     } else {
       // User already exists in Supabase Auth (from inviteUserByEmail)
-      // Confirm email and update metadata
+      // Confirm email, set password, and update metadata
       await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
         email_confirm: true,
+        // Ensure the invited user can login with email/password
+        // NOTE: pendingAdmin.password is stored temporarily and should be the plain password.
+        password: pendingAdmin.password,
         user_metadata: {
           full_name: pendingAdmin.name || '',
         },
