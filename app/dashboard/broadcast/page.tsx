@@ -16,6 +16,7 @@ interface Broadcast {
   tanggal: string
   status: string
   createdAt: string
+  imageUrl?: string | null
   recipients?: {
     nama?: string
     noWa?: string
@@ -695,6 +696,28 @@ export default function BroadcastPage() {
             </div>
 
             <div className="p-5">
+              {selectedBroadcast.imageUrl ? (
+                <div className="mb-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-600 mb-2">
+                    Gambar Broadcast
+                  </p>
+                  <a
+                    href={selectedBroadcast.imageUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-xl border-2 border-gray-200 bg-gray-50 overflow-hidden hover:border-[#303d83]/30 transition-all"
+                    title="Buka gambar di tab baru"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={selectedBroadcast.imageUrl}
+                      alt="Gambar broadcast"
+                      className="w-full max-h-80 object-contain bg-white"
+                    />
+                  </a>
+                </div>
+              ) : null}
+
               {selectedBroadcast.recipients && selectedBroadcast.recipients.length > 0 ? (
                 <div className="max-h-[60vh] overflow-y-auto rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50">
                   <div className="grid grid-cols-12 gap-3 px-4 py-3 border-b border-gray-200 text-xs font-semibold text-gray-600">

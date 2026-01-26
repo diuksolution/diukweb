@@ -2,6 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+function sanitizeFilename(name: string) {
+  return name
+    .replace(/[/\\?%*:|"<>]/g, '-') // windows reserved
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 120)
+}
+
+async function createSupabaseAdminIfConfigured() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceRoleKey) return null
+  const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+}
+
 // GET - Get list of broadcasts
 export async function GET() {
   try {
@@ -27,7 +44,19 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json({ broadcasts })
+    // Normalize recipients field (older records stored array; newer records may store object metadata)
+    const normalizedBroadcasts = (broadcasts as any[]).map((b) => {
+      const rec = b.recipients
+      let recipients = rec
+      let imageUrl: string | null = null
+      if (rec && typeof rec === 'object' && !Array.isArray(rec)) {
+        recipients = rec.recipients ?? null
+        imageUrl = rec.imageUrl ?? null
+      }
+      return { ...b, recipients, imageUrl }
+    })
+
+    return NextResponse.json({ broadcasts: normalizedBroadcasts })
   } catch (error) {
     console.error('Error fetching broadcasts:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -130,6 +159,44 @@ export async function POST(request: Request) {
       },
     })
 
+    // If image exists, upload to storage & save URL so it can show in history modal
+    let imageUrl: string | null = null
+    if (imageFile) {
+      const bucket = process.env.SUPABASE_BROADCAST_BUCKET || 'broadcast-media'
+      const supabaseAdmin = await createSupabaseAdminIfConfigured()
+      const storageClient = supabaseAdmin ?? supabase
+      const safeName = sanitizeFilename(imageFile.name || 'image')
+      // Use Supabase auth uid in the path (works nicely with common Storage RLS policies)
+      const objectPath = `broadcasts/${user.id}/${broadcast.id}/${Date.now()}-${safeName}`
+
+      const uploadRes = await storageClient.storage.from(bucket).upload(objectPath, imageFile, {
+        contentType: imageFile.type || 'application/octet-stream',
+        upsert: true,
+      })
+
+      if (uploadRes.error) {
+        console.error('Error uploading broadcast image:', uploadRes.error)
+        // cleanup so we don't keep "pending" broadcasts with missing image
+        await prisma.broadcast.delete({ where: { id: broadcast.id } }).catch(() => {})
+        return NextResponse.json(
+          {
+            error: `Gagal upload gambar broadcast: ${uploadRes.error.message}`,
+            hint: `Pastikan bucket "${bucket}" ada dan policy Storage mengizinkan upload (atau set SUPABASE_SERVICE_ROLE_KEY di server).`,
+          },
+          { status: 500 }
+        )
+      }
+
+      const publicRes = storageClient.storage.from(bucket).getPublicUrl(objectPath)
+      imageUrl = publicRes.data.publicUrl || null
+
+      broadcast = await prisma.broadcast.update({
+        where: { id: broadcast.id },
+        // Store imageUrl together with recipients metadata without requiring a schema migration
+        data: { recipients: { recipients, imageUrl } as any },
+      })
+    }
+
     // Prepare data for n8n webhook
     // Parse sheet ids (menu & reservasi) dari linkdata jika ada
     let menuSheetId: string | null = null
@@ -151,6 +218,7 @@ export async function POST(request: Request) {
       businessLinkdata: dbUser.business?.linkdata,
       menuSheetId,
       reservationSheetId,
+      imageUrl,
       customers: selectedCustomers.map((customer: any) => ({
         nama: customer.nama,
         noWa: customer.noWa,
@@ -230,7 +298,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      broadcast,
+      // Always return recipients as array for the UI, even if stored as object metadata
+      broadcast: { ...(broadcast as any), recipients, imageUrl },
       message: 'Broadcast berhasil dibuat dan dikirim ke n8n',
     })
   } catch (error) {
