@@ -195,6 +195,127 @@ export default function ReservasiPage() {
     }
   }
 
+  const findHeader = (allHeaders: string[], keywords: string[]) => {
+    const lowered = allHeaders.map((h) => ({ original: h, lower: (h || '').toLowerCase() }))
+    for (const kw of keywords) {
+      const needle = kw.toLowerCase()
+      const found = lowered.find((h) => h.lower.includes(needle))
+      if (found) return found.original
+    }
+    return null
+  }
+
+  const buildPdfRows = () => {
+    // Try to map dynamic sheet headers into the fixed columns user wants
+    const headerNama = findHeader(headers, ['nama', 'name'])
+    const headerJumlahOrang = findHeader(headers, ['jumlah orang', 'orang', 'people', 'pax'])
+    const headerTempat = findHeader(headers, ['tempat', 'lokasi', 'table', 'ruangan'])
+    const headerJam = findHeader(headers, ['jam', 'waktu', 'time'])
+    const headerMenu = findHeader(headers, ['menu yang dipesan', 'menu', 'pesanan', 'order'])
+    const headerCatatan = findHeader(headers, ['catatan', 'notes', 'keterangan'])
+
+    const rows = filteredReservations.map((r) => {
+      const tanggal = r._reservationDate ? formatDate(r._reservationDate) : '-'
+      const nama = headerNama ? String(r[headerNama] || '') : ''
+      const jumlahOrang = headerJumlahOrang ? String(r[headerJumlahOrang] || '') : ''
+      const tempat = headerTempat ? String(r[headerTempat] || '') : ''
+      const jam = headerJam ? String(r[headerJam] || '') : ''
+      const menu = headerMenu ? String(r[headerMenu] || '') : ''
+      const catatan = headerCatatan ? String(r[headerCatatan] || '') : ''
+
+      return [
+        tanggal || '-',
+        nama || '-',
+        jumlahOrang || '-',
+        tempat || '-',
+        jam || '-',
+        menu || '-',
+        catatan || '-',
+      ]
+    })
+
+    return rows
+  }
+
+  const downloadFilteredPdf = async () => {
+    try {
+      if (filteredReservations.length === 0) return
+
+      const [{ jsPDF }, autoTableMod] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+      ])
+      const autoTable: any = (autoTableMod as any).default || autoTableMod
+
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'pt',
+        format: 'a4',
+      })
+
+      const title = 'Laporan Reservasi'
+      const rangeLabel =
+        startDate && endDate
+          ? `Periode: ${formatDate(startDate)} – ${formatDate(endDate)}`
+          : startDate
+            ? `Dari: ${formatDate(startDate)}`
+            : endDate
+              ? `Sampai: ${formatDate(endDate)}`
+              : 'Periode: Semua'
+
+      doc.setFontSize(14)
+      doc.text(title, 40, 40)
+      doc.setFontSize(10)
+      doc.text(rangeLabel, 40, 60)
+
+      const head = [[
+        'Tanggal',
+        'Nama',
+        'Jumlah Orang',
+        'Tempat',
+        'Jam',
+        'Menu yang dipesan',
+        'Catatan',
+      ]]
+      const body = buildPdfRows()
+
+      autoTable(doc, {
+        startY: 80,
+        head,
+        body,
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+          cellPadding: 4,
+          overflow: 'linebreak',
+          valign: 'top',
+        },
+        headStyles: {
+          fillColor: [48, 61, 131],
+          textColor: 255,
+          fontStyle: 'bold',
+        },
+        columnStyles: {
+          0: { cellWidth: 70 }, // tanggal
+          1: { cellWidth: 90 }, // nama
+          2: { cellWidth: 70, halign: 'center' }, // jumlah orang
+          3: { cellWidth: 90 }, // tempat
+          4: { cellWidth: 55, halign: 'center' }, // jam
+          5: { cellWidth: 240 }, // menu
+          6: { cellWidth: 170 }, // catatan
+        },
+        margin: { left: 40, right: 40 },
+      })
+
+      const safeStart = startDate || 'all'
+      const safeEnd = endDate || 'all'
+      doc.save(`reservasi_${safeStart}_${safeEnd}.pdf`)
+    } catch (e: any) {
+      console.error('Failed to generate PDF', e)
+      setError('Gagal membuat PDF. Coba refresh halaman lalu coba lagi.')
+    }
+  }
+
   return (
     <div className="flex-1 p-6 lg:p-8 w-full max-w-full box-border min-w-0 overflow-x-hidden">
       <div className="relative w-full max-w-full box-border min-w-0 overflow-x-hidden">
@@ -252,6 +373,18 @@ export default function ReservasiPage() {
                     {filteredReservations.length} dari {reservations.length} Reservasi
                   </span>
                 </div>
+                <button
+                  type="button"
+                  onClick={downloadFilteredPdf}
+                  disabled={loading || filteredReservations.length === 0}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-linear-to-r from-[#303d83] via-[#14b8a6] to-[#84cc16] hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Download PDF dari data yang sedang ter-filter"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v10m0 0l3-3m-3 3L9 10m10 4v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5" />
+                  </svg>
+                  Download PDF
+                </button>
                 <button
                   onClick={fetchReservations}
                   className="px-4 py-2 rounded-xl text-sm font-semibold text-[#303d83] bg-[#303d83]/10 hover:bg-[#303d83]/20 transition-all flex items-center gap-2"

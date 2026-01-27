@@ -17,6 +17,8 @@
     "@supabase/supabase-js": "^2.87.1",
     "bcryptjs": "^3.0.3",
     "googleapis": "^169.0.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.4",
     "next": "16.0.8",
     "prisma": "^6.19.1",
     "react": "19.2.1",
