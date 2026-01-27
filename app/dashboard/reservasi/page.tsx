@@ -205,6 +205,140 @@ export default function ReservasiPage() {
     return null
   }
 
+  const normalizeMenuName = (name: string) => {
+    return String(name || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  const parseMenuQtyFromLine = (rawLine: string): { menu: string; qty: number } | null => {
+    const line = normalizeMenuName(rawLine)
+    if (!line) return null
+
+    // Special case: Google Sheets format like:
+    // "Baileys Coffee-Reguler-1-" / "Cendol Creme-Large-2-"
+    // We interpret it as menu = "Baileys Coffee-Reguler" and qty = 1.
+    const dashParts = line
+      .split('-')
+      .map((p) => p.trim())
+      .filter(Boolean)
+    if (dashParts.length >= 2) {
+      const last = dashParts[dashParts.length - 1]
+      if (/^\d+$/.test(last)) {
+        const qty = Number(last)
+        const menu = normalizeMenuName(dashParts.slice(0, -1).join('-'))
+        if (menu) return { menu, qty: qty > 0 ? qty : 1 }
+      }
+    }
+
+    // Patterns we support (examples):
+    // - "Aren Signature - Reguler x 2"
+    // - "Aren Signature - Reguler (2)"
+    // - "Aren Signature - Reguler: 2"
+    // - "Aren Signature - Reguler  2" (2+ spaces before number)
+    // - "2x Aren Signature - Reguler"
+    const patterns: Array<{
+      re: RegExp
+      map: (m: RegExpExecArray) => { menu: string; qty: number }
+    }> = [
+      {
+        re: /^\s*(\d+)\s*(?:x|\*|×)\s*(.+)\s*$/i,
+        map: (m) => ({ qty: Number(m[1]), menu: normalizeMenuName(m[2]) }),
+      },
+      {
+        re: /^\s*(.+?)\s*(?:x|\*|×)\s*(\d+)\s*$/i,
+        map: (m) => ({ menu: normalizeMenuName(m[1]), qty: Number(m[2]) }),
+      },
+      {
+        re: /^\s*(.+?)\s*[\(\[]\s*(\d+)\s*[\)\]]\s*$/i,
+        map: (m) => ({ menu: normalizeMenuName(m[1]), qty: Number(m[2]) }),
+      },
+      {
+        re: /^\s*(.+?)\s*(?:=|:|-)\s*(\d+)\s*$/i,
+        map: (m) => ({ menu: normalizeMenuName(m[1]), qty: Number(m[2]) }),
+      },
+      {
+        re: /^\s*(.+?\D)\s{2,}(\d+)\s*$/i,
+        map: (m) => ({ menu: normalizeMenuName(m[1]), qty: Number(m[2]) }),
+      },
+    ]
+
+    for (const p of patterns) {
+      const m = p.re.exec(line)
+      if (m) {
+        const parsed = p.map(m)
+        const qty = Number.isFinite(parsed.qty) && parsed.qty > 0 ? parsed.qty : 1
+        const menu = normalizeMenuName(parsed.menu)
+        if (!menu) return null
+        return { menu, qty }
+      }
+    }
+
+    // Fallback: treat the entire line as one menu with qty=1
+    return { menu: line, qty: 1 }
+  }
+
+  const buildMenuRecapRows = () => {
+    // Find columns for menu and (optional) qty
+    const headerMenu = findHeader(headers, ['menu yang dipesan', 'menu', 'pesanan', 'order'])
+    const headerJumlahOrang = findHeader(headers, ['jumlah orang', 'orang', 'people', 'pax'])
+    let headerQty = findHeader(headers, ['qty', 'quantity', 'jumlah menu', 'jumlah pesanan', 'jumlah order'])
+    if (headerQty && headerQty === headerJumlahOrang) headerQty = null
+
+    const agg = new Map<string, { tanggalIso: string; tanggalDisplay: string; menu: string; jumlah: number }>()
+
+    for (const r of filteredReservations) {
+      const tanggalIso = r._reservationDate ? (normalizeDate(r._reservationDate) || r._reservationDate) : ''
+      const tanggalDisplay = tanggalIso ? formatDate(tanggalIso) : '-'
+      const rawMenu = headerMenu ? String(r[headerMenu] || '') : ''
+      const rawQty = headerQty ? String(r[headerQty] || '') : ''
+      const qtyFromColumn = rawQty && /^\d+$/.test(rawQty.trim()) ? Number(rawQty.trim()) : null
+
+      // Split menu field into items. Your format uses comma-separated items like:
+      // "Baileys Coffee-Reguler-1-, Almond Harmony-Large-1-"
+      const expanded = String(rawMenu || '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .split(/[\n,;|•]+/g)
+        .map((s) => s.trim())
+        .filter(Boolean)
+
+      if (expanded.length === 0) continue
+
+      // If no qty can be parsed from text, and there is a qty column, apply it to the single menu item.
+      if (expanded.length === 1 && qtyFromColumn && qtyFromColumn > 0) {
+        const parsed = parseMenuQtyFromLine(expanded[0])
+        if (!parsed) continue
+        const key = `${tanggalIso || tanggalDisplay}||${parsed.menu.toLowerCase()}`
+        const existing = agg.get(key)
+        const jumlah = qtyFromColumn
+        if (existing) existing.jumlah += jumlah
+        else agg.set(key, { tanggalIso: tanggalIso || tanggalDisplay, tanggalDisplay, menu: parsed.menu, jumlah })
+        continue
+      }
+
+      for (const line of expanded) {
+        const parsed = parseMenuQtyFromLine(line)
+        if (!parsed) continue
+        const key = `${tanggalIso || tanggalDisplay}||${parsed.menu.toLowerCase()}`
+        const existing = agg.get(key)
+        if (existing) existing.jumlah += parsed.qty
+        else agg.set(key, { tanggalIso: tanggalIso || tanggalDisplay, tanggalDisplay, menu: parsed.menu, jumlah: parsed.qty })
+      }
+    }
+
+    const rows = Array.from(agg.values())
+      .filter((r) => r.menu && Number.isFinite(r.jumlah) && r.jumlah > 0)
+      .sort((a, b) => {
+        // Sort by ISO date then menu name
+        if (a.tanggalIso === b.tanggalIso) return a.menu.localeCompare(b.menu)
+        return a.tanggalIso.localeCompare(b.tanggalIso)
+      })
+      .map((r) => [r.tanggalDisplay, r.menu, String(r.jumlah)])
+
+    return rows
+  }
+
   const buildPdfRows = () => {
     // Try to map dynamic sheet headers into the fixed columns user wants
     const headerNama = findHeader(headers, ['nama', 'name'])
@@ -306,6 +440,46 @@ export default function ReservasiPage() {
         },
         margin: { left: 40, right: 40 },
       })
+
+      // Rekapan per menu (Tanggal | Menu | Jumlah)
+      const recapBody = buildMenuRecapRows()
+      if (recapBody.length > 0) {
+        const lastY =
+          ((doc as any).lastAutoTable && (doc as any).lastAutoTable.finalY) ? (doc as any).lastAutoTable.finalY : 80
+
+        doc.setFontSize(12)
+        doc.text('Rekapan per Menu', 40, lastY + 28)
+
+        const recapHead = [[
+          'Tanggal',
+          'Menu',
+          'Jumlah',
+        ]]
+
+        autoTable(doc, {
+          startY: lastY + 40,
+          head: recapHead,
+          body: recapBody,
+          theme: 'grid',
+          styles: {
+            fontSize: 9,
+            cellPadding: 4,
+            overflow: 'linebreak',
+            valign: 'top',
+          },
+          headStyles: {
+            fillColor: [20, 184, 166],
+            textColor: 255,
+            fontStyle: 'bold',
+          },
+          columnStyles: {
+            0: { cellWidth: 90 }, // tanggal
+            1: { cellWidth: 520 }, // menu
+            2: { cellWidth: 70, halign: 'right' }, // jumlah
+          },
+          margin: { left: 40, right: 40 },
+        })
+      }
 
       const safeStart = startDate || 'all'
       const safeEnd = endDate || 'all'
