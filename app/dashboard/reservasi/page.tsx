@@ -217,6 +217,8 @@ export default function ReservasiPage() {
 
     // Special case: Google Sheets format like:
     // "Baileys Coffee-Reguler-1-" / "Cendol Creme-Large-2-"
+    // Newer format also appears as:
+    // "Spaghetti Creamy Mushroom-Normal-7(mantao)" / "Hazeloats Crumble-Large-4(less)"
     // We interpret it as menu = "Baileys Coffee-Reguler" and qty = 1.
     const dashParts = line
       .split('-')
@@ -224,8 +226,9 @@ export default function ReservasiPage() {
       .filter(Boolean)
     if (dashParts.length >= 2) {
       const last = dashParts[dashParts.length - 1]
-      if (/^\d+$/.test(last)) {
-        const qty = Number(last)
+      const mQty = /^(\d+)(?:\([^)]*\))?$/.exec(last) // supports "7" or "7(mantao)"
+      if (mQty) {
+        const qty = Number(mQty[1])
         const menu = normalizeMenuName(dashParts.slice(0, -1).join('-'))
         if (menu) return { menu, qty: qty > 0 ? qty : 1 }
       }
