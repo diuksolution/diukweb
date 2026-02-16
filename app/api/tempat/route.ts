@@ -141,7 +141,7 @@ export async function GET() {
       .filter(({ name, index }) => index !== tanggalColIndex && name.length > 0)
 
     // Parse data rows
-    const placesData: Record<string, Record<string, number>> = {}
+    const placesData: Record<string, Record<string, string | number>> = {}
     const dates: string[] = []
 
     // Initialize places data structure
@@ -168,6 +168,13 @@ export async function GET() {
         // Check if it's already in YYYY-MM-DD format
         if (/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
           dateObj = new Date(tanggal + 'T00:00:00')
+        } else if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(tanggal.trim())) {
+          // Handle DD/MM/YYYY or DD-MM-YYYY (common in ID locale)
+          const parts = tanggal.trim().split(/[\/\-]/)
+          const day = parseInt(parts[0], 10)
+          const month = parseInt(parts[1], 10) - 1 // 0-indexed
+          const year = parseInt(parts[2], 10)
+          dateObj = new Date(year, month, day)
         } else {
           // Try parsing as date (handles various formats)
           dateObj = new Date(tanggal)
@@ -192,9 +199,17 @@ export async function GET() {
       // Process each place column (use original column index so skipping empty headers won't shift mapping)
       placeColumns.forEach(({ name, index: colIndex }) => {
         if (values.length > colIndex) {
-          const value = values[colIndex]?.trim() || '0'
-          const numValue = parseFloat(value) || 0
-          placesData[name][normalizedDate] = numValue
+          const raw = values[colIndex]?.trim() ?? ''
+
+          // If the cell contains a number, keep as number for backward compatibility.
+          // Otherwise keep the string as-is (e.g. "Tersedia" / "Tidak Tersedia").
+          const looksNumeric = /^-?\d+(\.\d+)?$/.test(raw)
+          if (looksNumeric) {
+            const numValue = parseFloat(raw)
+            placesData[name][normalizedDate] = Number.isFinite(numValue) ? numValue : raw
+          } else {
+            placesData[name][normalizedDate] = raw
+          }
         }
       })
     }
@@ -228,7 +243,7 @@ export async function GET() {
       name,
       availability: normalizedDates.map(date => ({
         date,
-        available: placesData[name][date] || 0,
+        available: placesData[name][date] ?? '',
       })),
     }))
 

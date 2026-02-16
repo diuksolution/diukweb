@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 
 interface PlaceAvailability {
   date: string
-  available: number
+  // Source data comes from sheet cells. Historically this was numeric,
+  // but it can also be strings like "Tersedia" / "Tidak Tersedia".
+  available: string | number | null | undefined
 }
 
 interface Place {
@@ -152,21 +154,27 @@ export default function TempatAvailability() {
     return closestDate
   }
 
-  const getAvailabilityForDate = (place: Place, date: string): number => {
-    if (!date) return 0
-    
+  const getAvailabilityForDate = (place: Place, date: string): 'Tersedia' | 'Tidak Tersedia' => {
+    if (!date) return 'Tidak Tersedia'
+
     const normalizedDate = normalizeDate(date)
-    console.log('Looking for availability for date:', normalizedDate, 'in place:', place.name)
-    console.log('Available dates in place:', place.availability.map(a => normalizeDate(a.date)))
-    
-    const availability = place.availability.find(a => {
-      const normalized = normalizeDate(a.date)
-      return normalized === normalizedDate
-    })
-    
-    const result = availability ? availability.available : 0
-    console.log('Found availability:', result)
-    return result
+
+    const availability = place.availability.find((a) => normalizeDate(a.date) === normalizedDate)
+    const raw = availability?.available
+
+    // Primary rule requested: if the cell value is exactly "Tersedia" (ignoring case/whitespace),
+    // treat as available. Otherwise, treat as not available.
+    if (typeof raw === 'string') {
+      const v = raw.trim().toLowerCase()
+      return v === 'tersedia' ? 'Tersedia' : 'Tidak Tersedia'
+    }
+
+    // Backward compatible: if older data is numeric, keep prior semantics.
+    if (typeof raw === 'number') {
+      return raw > 0 ? 'Tersedia' : 'Tidak Tersedia'
+    }
+
+    return 'Tidak Tersedia'
   }
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,7 +217,7 @@ export default function TempatAvailability() {
     return (
       <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl p-6">
         <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border-2 border-red-200">
-          <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
@@ -273,7 +281,7 @@ export default function TempatAvailability() {
           </p>
           <h3 className="text-lg font-bold text-gray-900">Data Tempat & Ketersediaan</h3>
         </div>
-        <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#303d83]/10 to-[#14b8a6]/10">
+        <div className="p-1.5 rounded-lg bg-linear-to-br from-[#303d83]/10 to-[#14b8a6]/10">
           <svg className="w-4 h-4 text-[#303d83]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
@@ -323,32 +331,37 @@ export default function TempatAvailability() {
       {/* Places Grid */}
       <div className="grid grid-cols-3 gap-3">
         {data.places.map((place) => {
-          const available = getAvailabilityForDate(place, selectedDate)
-          const isAvailable = available > 0
+          const availabilityLabel = getAvailabilityForDate(place, selectedDate)
+          const isAvailable = availabilityLabel === 'Tersedia'
           
           return (
             <div
               key={place.name}
               className={`rounded-lg border-2 p-3 transition-all duration-200 ${
                 isAvailable
-                  ? 'border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-md hover:border-green-300'
-                  : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:shadow-md hover:border-gray-300'
+                  ? 'border-green-200 bg-linear-to-br from-green-50 to-white hover:shadow-md hover:border-green-300'
+                  : 'border-gray-200 bg-linear-to-br from-gray-50 to-white hover:shadow-md hover:border-gray-300'
               }`}
             >
               <div className="flex items-start justify-between mb-2">
                 <h4 className="text-xs font-bold text-gray-900 line-clamp-2 leading-tight">{place.name}</h4>
-                <div className={`flex-shrink-0 ml-1 ${isAvailable ? 'text-green-600' : 'text-gray-400'}`}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                <div className={`shrink-0 ml-1 ${isAvailable ? 'text-green-600' : 'text-gray-400'}`}>
+                  {isAvailable ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
                 </div>
               </div>
               
               <div className="flex items-baseline gap-1.5">
-                <span className={`text-2xl font-bold ${isAvailable ? 'text-green-600' : 'text-gray-400'}`}>
-                  {available}
+                <span className={`text-xs font-semibold ${isAvailable ? 'text-green-600' : 'text-gray-500'}`}>
+                  {availabilityLabel}
                 </span>
-                <span className="text-xs text-gray-500">tersedia</span>
               </div>
             </div>
           )
