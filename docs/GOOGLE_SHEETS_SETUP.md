@@ -51,24 +51,89 @@ Jika tidak menggunakan API key, sistem akan mencoba fetch dari browser menggunak
 2. Share spreadsheet dengan akun Google yang login
 3. Pastikan browser mengizinkan cookies untuk domain Google
 
-### Opsi 3: Menggunakan Service Account (Advanced)
+### Opsi 3: Menggunakan Service Account (Required untuk Edit/Tambah/Hapus FAQ)
 
-Untuk production dengan banyak user, bisa menggunakan Service Account:
+**PENTING**: Untuk fitur **tambah/edit/hapus FAQ**, service account **WAJIB** dikonfigurasi dengan akses **Editor**.
 
 1. **Buat Service Account**:
-   - Di Google Cloud Console, buat Service Account
-   - Download JSON key file
+   - Buka [Google Cloud Console](https://console.cloud.google.com/)
+   - Pilih project Anda (atau buat project baru)
+   - Pergi ke **IAM & Admin** → **Service Accounts**
+   - Klik **Create Service Account**
+   - Isi nama (mis. "diuk-sheets-editor")
+   - Klik **Create and Continue**
+   - Skip role assignment (tidak perlu)
+   - Klik **Done**
 
-2. **Share Spreadsheet dengan Service Account**:
-   - Buka spreadsheet
-   - Share dengan email service account (format: `xxx@xxx.iam.gserviceaccount.com`)
-   - Berikan akses **Viewer**
+2. **Buat Key untuk Service Account**:
+   - Klik service account yang baru dibuat
+   - Pergi ke tab **Keys**
+   - Klik **Add Key** → **Create new key**
+   - Pilih format **JSON**
+   - Klik **Create** (file JSON akan otomatis terdownload)
 
-3. **Setup Environment Variables**:
+3. **Enable Google Sheets API**:
+   - Di Google Cloud Console, pergi ke **APIs & Services** → **Library**
+   - Cari "Google Sheets API"
+   - Klik **Enable** (jika belum enabled)
+
+4. **Share Spreadsheet dengan Service Account**:
+   - Buka spreadsheet di Google Sheets
+   - Klik **Share** (tombol di kanan atas)
+   - Paste email service account (format: `xxx@xxx.iam.gserviceaccount.com`)
+   - **PENTING**: Pilih akses **Editor** (bukan Viewer) agar bisa edit/tambah/hapus
+   - Klik **Send** (atau **Done**)
+
+5. **Setup Environment Variables**:
+
+   **Opsi A (Recommended untuk hosting seperti Vercel/Railway)**:
    ```env
    GOOGLE_SERVICE_ACCOUNT_EMAIL=xxx@xxx.iam.gserviceaccount.com
-   GOOGLE_SERVICE_ACCOUNT_KEY=path/to/key.json
+   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
    ```
+   
+   Untuk mendapatkan `private_key`:
+   - Buka file JSON yang didownload
+   - Copy value dari field `private_key` (termasuk `-----BEGIN PRIVATE KEY-----` dan `-----END PRIVATE KEY-----`)
+   - Paste ke env variable, pastikan tetap ada `\n` untuk newline
+
+   **Opsi B (Development/local)**:
+   ```env
+   GOOGLE_SERVICE_ACCOUNT_KEY=/path/to/key.json
+   ```
+   
+   Atau bisa juga paste seluruh isi JSON sebagai string:
+   ```env
+   GOOGLE_SERVICE_ACCOUNT_KEY='{"type":"service_account","project_id":"...","private_key_id":"...","private_key":"...","client_email":"...","client_id":"...","auth_uri":"...","token_uri":"...","auth_provider_x509_cert_url":"...","client_x509_cert_url":"..."}'
+   ```
+
+6. **Restart aplikasi** setelah menambahkan env variables
+
+## Setup untuk Fitur FAQ (Edit/Tambah/Hapus)
+
+Fitur FAQ membutuhkan **Service Account dengan akses Editor** untuk bisa edit/tambah/hapus data.
+
+### Quick Setup:
+
+1. **Buat Service Account** (ikuti langkah di Opsi 3 di atas)
+2. **Share spreadsheet dengan akses Editor** ke email service account
+3. **Set environment variables**:
+   ```env
+   GOOGLE_SERVICE_ACCOUNT_EMAIL=your-service-account@project.iam.gserviceaccount.com
+   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   ```
+4. **Restart aplikasi**
+
+### Verifikasi Setup:
+
+- **GET FAQ** (lihat data): Bisa tanpa service account (cukup spreadsheet public)
+- **POST/PUT/DELETE FAQ** (edit/tambah/hapus): Butuh service account dengan akses Editor
+
+Jika masih error "Service account belum dikonfigurasi", pastikan:
+- ✅ Env variables sudah di-set dengan benar
+- ✅ Service account sudah di-share ke spreadsheet dengan akses **Editor**
+- ✅ Google Sheets API sudah enabled di Google Cloud Console
+- ✅ Aplikasi sudah di-restart setelah set env variables
 
 ## Troubleshooting
 

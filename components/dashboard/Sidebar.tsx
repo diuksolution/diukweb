@@ -84,6 +84,20 @@ export default function Sidebar({ userRole }: SidebarProps) {
         </svg>
       ),
     },
+    {
+      name: 'FAQ',
+      href: '/dashboard/faq',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.07-.74 2.01-1.85 2.54-.83.4-1.15.86-1.15 1.46V15m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
+    },
   ]
 
   const handleLogout = async () => {
