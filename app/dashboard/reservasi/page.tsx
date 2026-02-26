@@ -103,10 +103,13 @@ export default function ReservasiPage() {
       // Try parsing various formats
       let date: Date
       
-      // Try DD/MM/YYYY format
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateOnly)) {
-        const [day, month, year] = dateOnly.split('/')
-        date = new Date(`${year}-${month}-${day}`)
+      // Try DD/MM/YYYY or DD-MM-YYYY format (common in ID locale)
+      if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(dateOnly)) {
+        const parts = dateOnly.split(/[\/\-]/)
+        const day = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1 // 0-indexed
+        const year = parseInt(parts[2], 10)
+        date = new Date(year, month, day)
       } else {
         // Try parsing as ISO string or other formats
         date = new Date(dateOnly)

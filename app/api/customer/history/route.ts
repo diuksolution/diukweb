@@ -206,6 +206,13 @@ export async function GET(request: Request) {
                 let dateObj: Date
                 if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
                   dateObj = new Date(dateValue + 'T00:00:00')
+                } else if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(dateValue.trim())) {
+                  // Handle DD/MM/YYYY or DD-MM-YYYY (common in ID locale)
+                  const parts = dateValue.trim().split(/[\/\-]/)
+                  const day = parseInt(parts[0], 10)
+                  const month = parseInt(parts[1], 10) - 1 // 0-indexed
+                  const year = parseInt(parts[2], 10)
+                  dateObj = new Date(year, month, day)
                 } else {
                   dateObj = new Date(dateValue)
                 }
