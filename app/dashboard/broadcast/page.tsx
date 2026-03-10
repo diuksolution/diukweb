@@ -32,6 +32,7 @@ export default function BroadcastPage() {
   const [selectedBroadcast, setSelectedBroadcast] = useState<Broadcast | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
+  const [customerSearch, setCustomerSearch] = useState('')
   const [formData, setFormData] = useState({
     pesan: '',
   })
@@ -424,6 +425,15 @@ export default function BroadcastPage() {
                     {selectedCustomers.length === customers.length ? 'Batal Pilih Semua' : 'Pilih Semua'}
                   </button>
                 </div>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    placeholder="Cari nama / ID WA / No WA customer..."
+                    className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#303d83] focus:border-transparent placeholder-gray-400"
+                  />
+                </div>
                 <div className="max-h-96 overflow-y-auto rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 space-y-2">
                   {loading ? (
                     <div className="text-center py-8">
@@ -440,29 +450,46 @@ export default function BroadcastPage() {
                       <p className="text-gray-500 text-sm">Tidak ada customer ditemukan</p>
                     </div>
                   ) : (
-                    customers.map((customer, idx) => (
-                      <label
-                        key={idx}
-                        className="flex items-center gap-3 p-3 rounded-lg border-2 border-gray-200 hover:border-[#303d83]/30 hover:bg-gradient-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 cursor-pointer transition-all duration-200"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedCustomers.includes(idx.toString())}
-                          onChange={() => handleToggleCustomer(idx.toString())}
-                          className="w-5 h-5 rounded border-2 border-gray-300 text-[#303d83] focus:ring-[#303d83] focus:ring-2"
-                        />
-                        <div className="flex-1 grid grid-cols-3 gap-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#303d83] to-[#14b8a6] flex items-center justify-center text-white text-xs font-bold">
-                              {customer.nama.charAt(0).toUpperCase()}
+                    customers.map((customer, idx) => {
+                      const term = customerSearch.trim().toLowerCase()
+                      if (term) {
+                        const nama = (customer.nama || '').toLowerCase()
+                        const idWa = (customer.idWa || '').toLowerCase()
+                        const noWa = (customer.noWa || '').toLowerCase()
+
+                        if (
+                          !nama.includes(term) &&
+                          !idWa.includes(term) &&
+                          !noWa.includes(term)
+                        ) {
+                          return null
+                        }
+                      }
+
+                      return (
+                        <label
+                          key={idx}
+                          className="flex items-center gap-3 p-3 rounded-lg border-2 border-gray-200 hover:border-[#303d83]/30 hover:bg-gradient-to-r hover:from-[#303d83]/5 hover:via-[#14b8a6]/5 hover:to-[#84cc16]/5 cursor-pointer transition-all duration-200"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedCustomers.includes(idx.toString())}
+                            onChange={() => handleToggleCustomer(idx.toString())}
+                            className="w-5 h-5 rounded border-2 border-gray-300 text-[#303d83] focus:ring-[#303d83] focus:ring-2"
+                          />
+                          <div className="flex-1 grid grid-cols-3 gap-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#303d83] to-[#14b8a6] flex items-center justify-center text-white text-xs font-bold">
+                                {customer.nama.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="font-semibold text-gray-900">{customer.nama}</span>
                             </div>
-                            <span className="font-semibold text-gray-900">{customer.nama}</span>
+                            <span className="text-gray-700 font-mono text-sm">{customer.idWa || <span className="text-gray-400">-</span>}</span>
+                            <span className="text-gray-700 font-mono text-sm">{customer.noWa || <span className="text-gray-400">-</span>}</span>
                           </div>
-                          <span className="text-gray-700 font-mono text-sm">{customer.idWa || <span className="text-gray-400">-</span>}</span>
-                          <span className="text-gray-700 font-mono text-sm">{customer.noWa || <span className="text-gray-400">-</span>}</span>
-                        </div>
-                      </label>
-                    ))
+                        </label>
+                      )
+                    })
                   )}
                 </div>
                 {selectedCustomers.length > 0 && (
