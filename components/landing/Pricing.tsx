@@ -4,9 +4,9 @@ import landingData from '@/data/landing-page.json'
 import { useScrollAnimation } from '@/lib/hooks/useScrollAnimation'
 
 function splitPrice(price: string): { amount: string; per?: string } {
-  const parts = price.split(' / ')
-  if (parts.length >= 2) return { amount: parts[0], per: parts.slice(1).join(' / ') }
-  return { amount: price }
+  const parts = price.split(/\s*\/\s*/)
+  if (parts.length >= 2) return { amount: parts[0].trim(), per: parts.slice(1).join(' / ').trim() }
+  return { amount: price.trim() }
 }
 
 function extractSetupFeeAmount(setupFee: string): string {
@@ -39,52 +39,54 @@ function PricingCard({ plan, delay }: { plan: any; delay: string }) {
   return (
     <div
       ref={ref}
-      className={`relative transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+      className={`h-full flex flex-col transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       style={{ transitionDelay: delay }}
     >
       <div
-        className="rounded-3xl p-[2px] shadow-lg hover:shadow-xl transition-shadow duration-300 h-[340px] sm:h-[500px]"
+        className="flex-1 flex flex-col rounded-3xl p-[2px] shadow-lg hover:shadow-xl transition-shadow duration-300 min-h-[380px] sm:min-h-[500px]"
         style={{ background: 'linear-gradient(135deg, #303d83, #14b8a6, #84cc16)' }}
       >
-        <div className="relative rounded-3xl bg-white px-6 pt-7 pb-20 overflow-hidden h-full flex flex-col">
-          {/* subtle inner glow */}
+        <div className="relative flex-1 flex flex-col rounded-3xl bg-white overflow-hidden">
           <div
-            className="absolute inset-0 opacity-30"
+            className="absolute inset-0 opacity-30 pointer-events-none"
             style={{ background: 'radial-gradient(circle at 30% 20%, rgba(48,61,131,0.10), transparent 55%)' }}
           />
-          <div className="flex flex-col h-full justify-center items-center">
-            <div className="text-center">
-              <h3 className="sm:text-2xl text-[16px] font-extrabold text-gray-900">{plan.name}</h3>
-              <div className="sm:mt-2 mt-1">
-                <span className="sm:text-2xl text-[16px] font-extrabold" style={{ color: '#84cc16' }}>
-                  {amount}
-                </span>
-                {per && <span className="sm:text-lg text-[12px] font-semibold text-gray-500">/{per}</span>}
-              </div>
-              {plan.period && <p className="mt-1 sm:text-sm text-[10px] text-gray-600">{plan.period}</p>}
-            </div>
 
-            <div className="sm:mt-6 mt-3 flex-1 overflow-hidden">
-              <div className="h-full overflow-auto pr-1 sm:space-y-3 space-y-1">
-                {(plan.features || []).map((feat: string, idx: number) => (
-                  <CheckItem key={idx}>{feat}</CheckItem>
-                ))}
-              </div>
+          <div className="relative z-10 text-center shrink-0 px-5 sm:px-6 pt-7">
+            {plan.category && (
+              <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                {plan.category}
+              </p>
+            )}
+            <h3 className="sm:text-2xl text-[16px] font-extrabold text-gray-900 mt-1">{plan.name}</h3>
+            <div className="sm:mt-2 mt-1">
+              <span className="sm:text-2xl text-[16px] font-extrabold leading-tight" style={{ color: '#84cc16' }}>
+                {amount}
+              </span>
+              {per && <span className="sm:text-lg text-[12px] font-semibold text-gray-500">/{per}</span>}
             </div>
-
-            {/* Setup fee badge */}
-            {setupFeeAmount && (
-              <div className="absolute bottom-5 justify-center w-[85%]">
-                <div
-                  className="rounded-2xl bg-white border-2 px-4 py-3 text-center shadow-lg"
-                  style={{ borderColor: '#84cc16' }}
-                >
-                  <p className="sm:text-sm text-[10px] font-semibold text-gray-700">Setup fee</p>
-                  <p className="sm:text-xl text-[12px] font-extrabold text-gray-900">{setupFeeAmount}</p>
-                </div>
-              </div>
+            {plan.period && (
+              <p className="mt-1 sm:text-sm text-[10px] text-gray-600 leading-snug px-1">{plan.period}</p>
             )}
           </div>
+
+          <div className="relative z-10 flex-1 min-h-0 overflow-auto px-5 sm:px-6 sm:mt-6 mt-3 sm:space-y-3 space-y-1 pb-20 sm:pb-24">
+            {(plan.features || []).map((feat: string, idx: number) => (
+              <CheckItem key={idx}>{feat}</CheckItem>
+            ))}
+          </div>
+
+          {setupFeeAmount && (
+            <div className="absolute bottom-4 left-4 right-4 sm:left-5 sm:right-5 z-20">
+              <div
+                className="rounded-2xl bg-white border-2 px-3 py-2 sm:px-4 sm:py-2.5 text-center shadow-md"
+                style={{ borderColor: '#84cc16' }}
+              >
+                <p className="text-[10px] sm:text-xs font-semibold text-gray-700">Setup fee</p>
+                <p className="text-[12px] sm:text-lg font-extrabold text-gray-900 leading-tight">{setupFeeAmount}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -99,7 +101,6 @@ export default function Pricing() {
 
   return (
     <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(to bottom, rgba(48,61,131,0.05), white, rgba(132,204,22,0.05))' }}>
-      {/* Background accents */}
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(48,61,131,0.03), white, rgba(132,204,22,0.03))' }}>
         <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 15% 30%, rgba(48,61,131,0.08), transparent 55%)' }}></div>
         <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 85% 70%, rgba(132,204,22,0.08), transparent 55%)' }}></div>
@@ -118,22 +119,25 @@ export default function Pricing() {
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">{pricing.description}</p>
         </div>
 
-        {/* AI Packages */}
-        <div className="grid md:grid-cols-2 gap-8 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-14">
           {pricing.packages.map((plan: any, index: number) => {
             return <PricingCard key={plan.name} plan={plan} delay={`${0.1 * index}s`} />
           })}
         </div>
 
-        {/* Website Packages */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {pricing.website.map((plan: any, index: number) => {
-            return <PricingCard key={plan.name} plan={plan} delay={`${0.1 * index}s`} />
-          })}
-        </div>
-
+        {pricing.website?.length > 0 && (
+          <div className={pricing.website.length === 1 ? 'flex justify-center' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8'}>
+            {pricing.website.map((plan: any, index: number) => (
+              <div
+                key={plan.name}
+                className={pricing.website.length === 1 ? 'w-full max-w-md h-full' : 'h-full'}
+              >
+                <PricingCard plan={plan} delay={`${0.1 * index}s`} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
 }
-

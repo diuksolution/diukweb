@@ -20,24 +20,26 @@
     }
   },
   "hero": {
-    "badge": "AI-Powered Customer Service & Sales",
-    "title": "Al Sales Automation for Modern Businesses",
-    "description": "Meningkatkan penjualan, mengurangi beban operasional, dan membuat bisnis Anda bekerja 24/7 tanpa bergantung pada manusia.",
+    "badge": "AI Automation Platform untuk Customer Service",
+    "title": "Platform Otomasi AI untuk Customer Service, Reservasi, dan Operasional UMKM",
+    "description": "Mengotomatisasi customer service, reservasi, dan follow-up pelanggan melalui AI Agent yang bekerja 24/7 tanpa menambah jumlah admin.",
     "ctaButtons": [
       { "label": "Hubungi Kami", "href": "#contact", "variant": "secondary" },
       { "label": "Mulai Sekarang", "href": "/login", "variant": "primary" }
     ],
-    "trustedBy": "Let AI do the work for your business."
+    "trustedBy": "Serve Smarter. Grow Faster."
   },
   "trustedBy": {
     "title": "Dipercaya oleh berbagai bisnis",
     "brands": [
-      { "name": "Kasiko Coffee", "logo": "/brands/kasiko.png" },
-      { "name": "Santo", "logo": "/brands/kasiko.png" },
-      { "name": "Royal Parking", "logo": "/brands/kasiko.png" },
-      { "name": "Sominer", "logo": "/brands/kasiko.png" },
-      { "name": "Dr W Skincare", "logo": "/brands/kasiko.png" },
-      { "name": "Scarlett", "logo": "/brands/kasiko.png" }
+      { "name": "Kasiko Coffee", "logo": "/brands/kasikocoffee.webp" },
+      { "name": "Haibanana", "logo": "/brands/haibanana.webp" },
+      { "name": "Kasikos Coffee", "logo": "/brands/kasikocoffee.webp" },
+      { "name": "Haibasnana", "logo": "/brands/haibanana.webp" },
+      { "name": "Kasikdo Coffee", "logo": "/brands/kasikocoffee.webp" },
+      { "name": "Haibadnana", "logo": "/brands/haibanana.webp" },
+      { "name": "Kasikdosd Coffee", "logo": "/brands/kasikocoffee.webp" },
+      { "name": "Haibadnansda", "logo": "/brands/haibanana.webp" }
     ]
   },
   "businessChallenges": {
@@ -47,11 +49,11 @@
     "image": "/bisnischallenges.png",
     "challenges": [
       {
-        "text": "Respon pelanggan lambat",
+        "text": "Respon ke pelanggan lambat",
         "consequence": "peluang closing hilang"
       },
       {
-        "text": "Chat menumpuk di WhatsApp, Instagram, TikTok"
+        "text": "Reservasi masih manual dan tidak efisien"
       },
       {
         "text": "Admin sering salah jawab atau tidak konsisten"
@@ -60,7 +62,7 @@
         "text": "Tidak ada otomatisasi follow-up"
       },
       {
-        "text": "Data pelanggan tidak tercatat dengan baik"
+        "text": "Informasi tersebar di banyak platform, tidak terpusat"
       }
     ],
     "consequences": {
@@ -330,72 +332,60 @@
     "packages": [
       {
         "category": "AI Agent",
-        "name": "Diuk Plus",
-        "price": "IDR 1.000.000,00 / month",
-        "period": "AI Agent WhatsApp",
-        "features": [
-          "24 jam AI kerja",
-          "AI responses 25k / month",
-          "CRM Integration",
-          "Dashboard Customer Service",
-          "Smart Broadcast",
-          "Customize"
-        ],
-        "setupFee": "Setup fee AI agent IDR 4.000.000,00"
-      },
-      {
-        "category": "AI Agent",
-        "name": "Diuk Plus Pro",
-        "price": "IDR 1.300.000,00 / month",
-        "period": "AI Agent WhatsApp + Instagram",
+        "name": "Diuk Pro",
+        "price": "IDR 599.000  / month",
+        "period": "AI Agent + Reservation + Website Profile",
         "features": [
           "24 jam AI kerja",
           "AI responses 50k / month",
-          "CRM Integration",
+          "Advanced CRM Integration",
           "Dashboard Customer Service",
           "Smart Broadcast",
-          "Customize"
+          "Smart Reservation System + Website Profile"
         ],
-        "setupFee": "Setup fee AI agent IDR 4.200.000,00",
-        "tag": ""
+        "setupFee": "Setup fee IDR 6.000.000,00"
+      },
+      {
+        "category": "AI Agent",
+        "name": "Diuk Plus",
+        "price": "IDR 499.000 / month",
+        "period": "Multi-channel AI WhatsApp + Instagram",
+        "features": [
+          "24 jam AI kerja",
+          "AI responses 50k / month",
+          "Advanced CRM Integration",
+          "Dashboard Customer Service",
+          "Smart Broadcast"
+        ],
+        "setupFee": "Setup fee IDR 4.000.000,00"
+      },
+      {
+        "category": "AI Agent",
+        "name": "Diuk Standard",
+        "price": "IDR 299.000 / month",
+        "period": "WhatsApp AI Agent Customer Service",
+        "features": [
+          "24 jam AI kerja",
+          "AI responses 25k / month",
+          "Basic CRM Integration",
+          "Dashboard Customer Service",
+          "Smart Broadcast"
+        ],
+        "setupFee": "Setup fee IDR 3.000.000,00"
       }
     ],
     "website": [
       {
         "category": "Website",
-        "name": "Diuk Web Buy on Table",
-        "price": "IDR 500.000,00 / month",
-        "period": "Buy on Table",
-        "features": [
-          "QR Code Menu on Table",
-          "Dashboard Order Management"
-        ],
-        "setupFee": "Setup fee website IDR 1.500.000,00"
-      },
-      {
-        "category": "Website",
         "name": "Diuk Web",
-        "price": "IDR 1.200.000,00 / year",
+        "price": "Free Hosting + Domain",
         "period": "Website profile",
         "features": [
           "Website profile",
           "Domain URL",
           "Free customize design"
         ],
-        "setupFee": "Setup fee website IDR 3.500.000,00"
-      },
-      {
-        "category": "Website",
-        "name": "Diuk Web Full Customize",
-        "price": "IDR 1.200.000,00 / year",
-        "period": "Website profile",
-        "features": [
-          "Website profile",
-          "Domain URL",
-          "Free customize design",
-          "Reservasi Web Otomatis"
-        ],
-        "setupFee": "Setup fee website IDR 3.500.000,00"
+        "setupFee": "Setup fee website IDR 1.200.000,00"
       }
     ]
   },
